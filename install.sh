@@ -6,7 +6,7 @@ echo "Installing dotfiles..."
 # Install Nix if not present
 if ! command -v nix &> /dev/null; then
     echo "Installing Nix..."
-    sh <(curl -L https://nixos.org/nix/install) --no-daemon
+    sh <(curl -L https://nixos.org/nix/install) --no-daemon --yes
     . ~/.nix-profile/etc/profile.d/nix.sh
 fi
 
@@ -39,7 +39,7 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     if ! grep -q "$ZSH_PATH" /etc/shells; then
         echo "$ZSH_PATH" | sudo tee -a /etc/shells
     fi
-    chsh -s "$ZSH_PATH"
+    sudo chsh -s "$ZSH_PATH" "$USER"
 fi
 
 echo "Done! Restart your shell or run: exec zsh"

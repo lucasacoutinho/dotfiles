@@ -18,15 +18,23 @@ cd ~/.dotfiles
 
 ## Usage in Devcontainers
 
-Add to your devcontainer.json:
+See `devcontainer.example.json` for a complete example, or add to your devcontainer.json:
 
 ```json
 {
-  "postCreateCommand": "git clone https://github.com/lucasacoutinho/dotfiles.git ~/.dotfiles && ~/.dotfiles/install.sh"
+  "postCreateCommand": "git clone https://github.com/lucasacoutinho/dotfiles.git ~/.dotfiles && ~/.dotfiles/install.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": { "path": "~/.nix-profile/bin/zsh" }
+        }
+      }
+    }
+  }
 }
 ```
-
-Or use the `--no-daemon` Nix install for containers without systemd.
 
 ## Customizing
 

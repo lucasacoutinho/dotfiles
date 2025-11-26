@@ -31,22 +31,30 @@ in
     syntaxHighlighting.enable = true;
 
     shellAliases = {
-      ls = "eza";
-      ll = "eza -la";
-      lt = "eza --tree";
+      ls = "eza --color=auto";
+      ll = "eza -la --color=auto";
+      lt = "eza --tree --color=auto";
       cat = "bat";
       grep = "rg";
       find = "fd";
       cd = "z";
     };
 
+    sessionVariables = {
+      # eza colors - bright blue directories for dark terminals
+      EZA_COLORS = "di=1;34:ln=1;36:ex=1;32";
+    };
+
     initExtra = ''
+      # Cargo
+      [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+      # NVM
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+
       # Initialize zoxide
       eval "$(zoxide init zsh)"
-
-      # FZF keybindings
-      source ${pkgs.fzf}/share/fzf/key-bindings.zsh
-      source ${pkgs.fzf}/share/fzf/completion.zsh
 
       # Better history
       HISTSIZE=10000
@@ -56,37 +64,45 @@ in
     '';
   };
 
-  # Starship prompt
+  # Starship prompt - bash-like style
   programs.starship = {
     enable = true;
     settings = {
-      format = "$directory$git_branch$git_status$cmd_duration$line_break$character";
+      format = "$username$hostname$directory$git_branch$git_status$character";
+      add_newline = false;
+
+      username = {
+        show_always = true;
+        style_user = "bright-green bold";
+        format = "[$user]($style)@";
+      };
+
+      hostname = {
+        ssh_only = false;
+        style = "bright-green bold";
+        format = "[$hostname]($style):";
+      };
 
       directory = {
-        style = "blue bold";
-        truncation_length = 3;
-        truncate_to_repo = true;
+        style = "bright-blue bold";
+        truncation_length = 0;
+        truncate_to_repo = false;
       };
 
       git_branch = {
-        style = "purple";
-        format = "[$symbol$branch]($style) ";
+        style = "bright-yellow";
+        format = " [$branch]($style)";
       };
 
       git_status = {
-        style = "red";
-        format = "[$all_status$ahead_behind]($style) ";
-      };
-
-      cmd_duration = {
-        min_time = 2000;
-        style = "yellow";
-        format = "[$duration]($style) ";
+        style = "bright-yellow";
+        format = "[$all_status$ahead_behind]($style)";
       };
 
       character = {
-        success_symbol = "[>](green)";
-        error_symbol = "[>](red)";
+        success_symbol = "[\\$](white)";
+        error_symbol = "[\\$](bright-red)";
+        format = " $symbol ";
       };
     };
   };
