@@ -46,6 +46,11 @@ in
     };
 
     initExtra = ''
+      # Source Nix profile (must be first to add ~/.nix-profile/bin to PATH)
+      if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
+        . ~/.nix-profile/etc/profile.d/nix.sh
+      fi
+
       # Cargo
       [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
