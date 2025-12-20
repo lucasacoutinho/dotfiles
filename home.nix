@@ -21,7 +21,6 @@ in
     jq           # JSON processor
     htop         # Process viewer
     tree         # Directory tree
-    delta        # Better git diff
   ];
 
   # Shell - Zsh
@@ -29,6 +28,15 @@ in
     enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+    completionInit = ''
+      # Cache compinit - only regenerate once per day
+      autoload -Uz compinit
+      if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+        compinit
+      else
+        compinit -C
+      fi
+    '';
 
     shellAliases = {
       ls = "eza --color=auto";
@@ -41,11 +49,10 @@ in
     };
 
     sessionVariables = {
-      # eza colors - bright blue directories for dark terminals
       EZA_COLORS = "di=1;34:ln=1;36:ex=1;32";
     };
 
-    initExtra = ''
+    initContent = ''
       # Source Nix profile (must be first to add ~/.nix-profile/bin to PATH)
       if [ -e ~/.nix-profile/etc/profile.d/nix.sh ]; then
         . ~/.nix-profile/etc/profile.d/nix.sh
@@ -54,9 +61,37 @@ in
       # Cargo
       [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
-      # NVM
+      # Load user-defined PATH extensions if file exists
+      [ -f "$HOME/.zsh_extra_path" ] && source "$HOME/.zsh_extra_path"
+
+      # NVM - Lazy loading for faster shell startup
       export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+      if [ -s "$NVM_DIR/nvm.sh" ]; then
+        # Add node to PATH without loading nvm (if default version exists)
+        [ -d "$NVM_DIR/versions/node" ] && PATH="$NVM_DIR/versions/node/$(ls -1 $NVM_DIR/versions/node | tail -1)/bin:$PATH"
+
+        # Lazy load nvm when first called
+        nvm() {
+          unset -f nvm node npm npx
+          source "$NVM_DIR/nvm.sh"
+          nvm "$@"
+        }
+        node() {
+          unset -f nvm node npm npx
+          source "$NVM_DIR/nvm.sh"
+          node "$@"
+        }
+        npm() {
+          unset -f nvm node npm npx
+          source "$NVM_DIR/nvm.sh"
+          npm "$@"
+        }
+        npx() {
+          unset -f nvm node npm npx
+          source "$NVM_DIR/nvm.sh"
+          npx "$@"
+        }
+      fi
 
       # Initialize zoxide
       eval "$(zoxide init zsh)"
@@ -66,6 +101,9 @@ in
       SAVEHIST=10000
       setopt SHARE_HISTORY
       setopt HIST_IGNORE_DUPS
+
+      # Custom PATH additions
+      export PATH="$HOME/.local/bin:$PATH"
     '';
   };
 
@@ -113,14 +151,12 @@ in
   };
 
   # Git config
-  programs.git = {
+  programs.delta = {
     enable = true;
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        side-by-side = true;
-      };
+    enableGitIntegration = true;  # required now
+    options = {
+      navigate = true;
+      side-by-side = true;
     };
   };
 
