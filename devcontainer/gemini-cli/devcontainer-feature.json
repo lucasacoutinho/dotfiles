@@ -1,9 +1,9 @@
 {
   "id": "gemini-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Google Gemini CLI",
-  "description": "Installs Google Gemini CLI and shares host credentials with the devcontainer",
-  "documentationURL": "https://github.com/lucasacoutinho/devcontainer-features/tree/main/src/gemini-cli",
+  "description": "Installs Google Gemini CLI and shares host ~/.gemini (auth, settings) with the devcontainer",
+  "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/gemini-cli",
   "keywords": ["gemini", "google", "ai", "cli", "credentials"],
   "options": {
     "version": {
