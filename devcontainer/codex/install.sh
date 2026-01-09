@@ -22,14 +22,23 @@ else
     npm install -g "@openai/codex@$VERSION"
 fi
 
-# Create symlinks from user home to mounted host directories
-REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
-
-if [ -d "/mnt/host-codex" ]; then
-    echo "Linking $REMOTE_HOME/.codex -> /mnt/host-codex"
-    rm -rf "$REMOTE_HOME/.codex" 2>/dev/null || true
-    ln -sf /mnt/host-codex "$REMOTE_HOME/.codex"
-    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.codex" 2>/dev/null || true
+# Create a script that runs at container start to set up symlinks
+cat > /usr/local/bin/codex-setup << 'SETUP_EOF'
+#!/bin/bash
+if [ -d "/mnt/host-codex" ] && [ ! -L "$HOME/.codex" ]; then
+    rm -rf "$HOME/.codex" 2>/dev/null || true
+    ln -sf /mnt/host-codex "$HOME/.codex"
+    echo "Linked ~/.codex -> /mnt/host-codex"
 fi
+SETUP_EOF
+chmod +x /usr/local/bin/codex-setup
 
-echo "Codex CLI installed. Host ~/.codex mounted and symlinked."
+cat > /etc/profile.d/codex-setup.sh << 'PROFILE_EOF'
+#!/bin/bash
+if [ -x /usr/local/bin/codex-setup ]; then
+    /usr/local/bin/codex-setup 2>/dev/null
+fi
+PROFILE_EOF
+chmod +x /etc/profile.d/codex-setup.sh
+
+echo "Codex CLI installed. Host mounts will be symlinked on first login."

@@ -50,30 +50,36 @@ else
     echo "WARNING: Claude CLI command not found in PATH after installation"
 fi
 
-# Create symlinks from user home to mounted host directories
-# _REMOTE_USER_HOME is set by devcontainer during feature install
-REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
+# Create a script that runs at container start to set up symlinks
+# (Mounts don't exist at build time, only at runtime)
+cat > /usr/local/bin/claude-code-setup << 'SETUP_EOF'
+#!/bin/bash
+# Setup symlinks for Claude Code host mounts
+# This runs at container start, when mounts are available
 
-echo "Setting up symlinks for remote user home: $REMOTE_HOME"
-
-# Symlink ~/.claude -> /mnt/host-claude (if mount exists)
-if [ -d "/mnt/host-claude" ]; then
-    echo "Linking $REMOTE_HOME/.claude -> /mnt/host-claude"
-    rm -rf "$REMOTE_HOME/.claude" 2>/dev/null || true
-    ln -sf /mnt/host-claude "$REMOTE_HOME/.claude"
-    # Fix ownership for the symlink
-    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.claude" 2>/dev/null || true
+if [ -d "/mnt/host-claude" ] && [ ! -L "$HOME/.claude" ]; then
+    rm -rf "$HOME/.claude" 2>/dev/null || true
+    ln -sf /mnt/host-claude "$HOME/.claude"
+    echo "Linked ~/.claude -> /mnt/host-claude"
 fi
 
-# Symlink ~/.claude.json -> /mnt/host-claude.json (if mount exists)
-if [ -f "/mnt/host-claude.json" ]; then
-    echo "Linking $REMOTE_HOME/.claude.json -> /mnt/host-claude.json"
-    rm -f "$REMOTE_HOME/.claude.json" 2>/dev/null || true
-    ln -sf /mnt/host-claude.json "$REMOTE_HOME/.claude.json"
-    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.claude.json" 2>/dev/null || true
+if [ -f "/mnt/host-claude.json" ] && [ ! -L "$HOME/.claude.json" ]; then
+    rm -f "$HOME/.claude.json" 2>/dev/null || true
+    ln -sf /mnt/host-claude.json "$HOME/.claude.json"
+    echo "Linked ~/.claude.json -> /mnt/host-claude.json"
 fi
+SETUP_EOF
+chmod +x /usr/local/bin/claude-code-setup
+
+# Add to profile.d so it runs on login
+cat > /etc/profile.d/claude-code-setup.sh << 'PROFILE_EOF'
+#!/bin/bash
+# Run claude-code-setup once per session
+if [ -x /usr/local/bin/claude-code-setup ]; then
+    /usr/local/bin/claude-code-setup 2>/dev/null
+fi
+PROFILE_EOF
+chmod +x /etc/profile.d/claude-code-setup.sh
 
 echo "Claude Code feature installation complete!"
-echo ""
-echo "Host ~/.claude and ~/.claude.json are mounted and symlinked."
-echo "Your skills, plugins, and auth from the host are now available."
+echo "Host mounts will be symlinked on first login."

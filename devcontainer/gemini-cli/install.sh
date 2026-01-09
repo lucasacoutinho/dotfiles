@@ -22,14 +22,23 @@ else
     npm install -g "@google/gemini-cli@$VERSION"
 fi
 
-# Create symlinks from user home to mounted host directories
-REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
-
-if [ -d "/mnt/host-gemini" ]; then
-    echo "Linking $REMOTE_HOME/.gemini -> /mnt/host-gemini"
-    rm -rf "$REMOTE_HOME/.gemini" 2>/dev/null || true
-    ln -sf /mnt/host-gemini "$REMOTE_HOME/.gemini"
-    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.gemini" 2>/dev/null || true
+# Create a script that runs at container start to set up symlinks
+cat > /usr/local/bin/gemini-setup << 'SETUP_EOF'
+#!/bin/bash
+if [ -d "/mnt/host-gemini" ] && [ ! -L "$HOME/.gemini" ]; then
+    rm -rf "$HOME/.gemini" 2>/dev/null || true
+    ln -sf /mnt/host-gemini "$HOME/.gemini"
+    echo "Linked ~/.gemini -> /mnt/host-gemini"
 fi
+SETUP_EOF
+chmod +x /usr/local/bin/gemini-setup
 
-echo "Gemini CLI installed. Host ~/.gemini mounted and symlinked."
+cat > /etc/profile.d/gemini-setup.sh << 'PROFILE_EOF'
+#!/bin/bash
+if [ -x /usr/local/bin/gemini-setup ]; then
+    /usr/local/bin/gemini-setup 2>/dev/null
+fi
+PROFILE_EOF
+chmod +x /etc/profile.d/gemini-setup.sh
+
+echo "Gemini CLI installed. Host mounts will be symlinked on first login."
