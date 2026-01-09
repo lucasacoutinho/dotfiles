@@ -39,7 +39,7 @@ Personal workflow skills:
 
 ## Usage in Devcontainers
 
-See `devcontainer/example.json` or add to your `devcontainer.json`:
+See `devcontainer.example.json` or add to your `devcontainer.json`:
 
 ```json
 {
@@ -70,8 +70,8 @@ Create a new skill in `.claude/skills/<skill-name>/SKILL.md` and re-run `./insta
 dotfiles/
 ├── home.nix                 # Nix/Home Manager config
 ├── install.sh               # Installation script
+├── devcontainer.example.json
 ├── devcontainer/            # Devcontainer features
-│   ├── example.json
 │   ├── claude-code/
 │   ├── codex/
 │   └── gemini-cli/
