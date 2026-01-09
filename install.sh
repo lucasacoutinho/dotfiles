@@ -26,19 +26,20 @@ if ! nix-channel --list | grep -q home-manager; then
     nix-channel --update
 fi
 
+# Link home.nix BEFORE installing home-manager (it runs switch internally)
+echo "Linking home.nix..."
+mkdir -p ~/.config/home-manager
+ln -sf "$DOTFILES_DIR/home.nix" ~/.config/home-manager/home.nix
+
 # Install Home Manager if not present
 if ! command -v home-manager &> /dev/null; then
     echo "Installing Home Manager..."
     nix-shell '<home-manager>' -A install
+else
+    # Apply configuration if home-manager already installed
+    echo "Applying Home Manager configuration..."
+    home-manager switch
 fi
-
-# Link home.nix
-mkdir -p ~/.config/home-manager
-ln -sf "$DOTFILES_DIR/home.nix" ~/.config/home-manager/home.nix
-
-# Apply configuration
-echo "Applying Home Manager configuration..."
-home-manager switch
 
 # Set zsh as default shell
 if [ "$SHELL" != "$(which zsh)" ]; then

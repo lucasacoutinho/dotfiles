@@ -1,15 +1,63 @@
 {
-  "postCreateCommand": "git clone https://github.com/lucasacoutinho/dotfiles.git ~/.dotfiles && ~/.dotfiles/install.sh",
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh",
-        "terminal.integrated.profiles.linux": {
-          "zsh": {
-            "path": "~/.nix-profile/bin/zsh"
-          }
+    "name": "fp-checkout-management-ms",
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "fp-checkout-backend",
+    "remoteUser": "dev",
+    "workspaceFolder": "/var/www/html/app",
+    "runServices": [
+        "fp-checkout-server",
+        "fp-checkout-redis",
+        "fp-checkout-mongo",
+        "fp-checkout-minio",
+        "fp-checkout-cache-store",
+        "fp-checkout-frontend",
+        "fp-checkout-cart-frontend"
+    ],
+    "features": {
+        "ghcr.io/lucasacoutinho/dotfiles/claude-code:latest": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "xdebug.php-debug",
+                "mikestead.dotenv",
+                "onecentlin.laravel-blade",
+                "EditorConfig.EditorConfig",
+                "fterrag.vscode-php-cs-fixer",
+                "onecentlin.laravel5-snippets",
+                "bmewburn.vscode-intelephense-client",
+                "mehedidracula.php-namespace-resolver",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "laravel.vscode-laravel",
+                "emallin.phpunit",
+                "m1guelpf.better-pest",
+                "Anthropic.claude-code",
+                "kilocode.kilo-code",
+                "Supermaven.supermaven"
+            ],
+            "settings": {
+                "namespaceResolver.sortAlphabetically": true,
+                "namespaceResolver.autoSort": true,
+                "namespaceResolver.sortOnSave": true,
+                "namespaceResolver.showMessageOnStatusBar": false,
+                "namespaceResolver.exclude": "**/node_modules/**",
+                "[php]": {
+                    "editor.tabSize": 4,
+                    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client",
+                    "editor.formatOnSave": true,
+                    "intelephense.licenceKey": "00HJSNHSV4QKGK0"
+                },
+                "php.validate.executablePath": "/usr/local/bin/php",
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "zsh": {
+                        "path": "/home/dev/.nix-profile/bin/zsh"
+                    }
+                }
+            }
         }
-      }
-    }
-  }
+    },
+    "shutdownAction": "stopCompose",
+    "postCreateCommand": "git clone https://github.com/lucasacoutinho/dotfiles.git ~/personal/dotfiles && ~/personal/dotfiles/install.sh"
 }
