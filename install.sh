@@ -3,6 +3,15 @@ set -e
 
 echo "Installing dotfiles..."
 
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Create ~/.dotfiles symlink for compatibility
+if [ ! -L "$HOME/.dotfiles" ]; then
+    echo "Creating ~/.dotfiles symlink..."
+    rm -rf "$HOME/.dotfiles" 2>/dev/null || true
+    ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
+fi
+
 # Install Nix if not present
 if ! command -v nix &> /dev/null; then
     echo "Installing Nix..."
@@ -24,7 +33,6 @@ if ! command -v home-manager &> /dev/null; then
 fi
 
 # Link home.nix
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p ~/.config/home-manager
 ln -sf "$DOTFILES_DIR/home.nix" ~/.config/home-manager/home.nix
 
@@ -40,6 +48,18 @@ if [ "$SHELL" != "$(which zsh)" ]; then
         echo "$ZSH_PATH" | sudo tee -a /etc/shells
     fi
     sudo chsh -s "$ZSH_PATH" "$USER"
+fi
+
+# Install Claude Code skills
+if [ -d "$DOTFILES_DIR/.claude/skills" ]; then
+    echo "Installing Claude Code skills..."
+    mkdir -p ~/.claude/skills
+    for skill_dir in "$DOTFILES_DIR/.claude/skills"/*; do
+        if [ -d "$skill_dir" ]; then
+            skill_name=$(basename "$skill_dir")
+            ln -sf "$skill_dir" "$HOME/.claude/skills/$skill_name"
+        fi
+    done
 fi
 
 echo "Done! Restart your shell or run: exec zsh"

@@ -21,6 +21,15 @@ in
     jq           # JSON processor
     htop         # Process viewer
     tree         # Directory tree
+
+    # Data processing
+    yq-go        # YAML processor (like jq for YAML)
+    qsv          # CSV toolkit (maintained fork of xsv)
+
+    # Code analysis
+    tokei        # Code statistics
+    tree-sitter  # Incremental parsing
+    universal-ctags  # Code navigation tags
   ];
 
   # Shell - Zsh

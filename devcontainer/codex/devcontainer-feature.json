@@ -1,0 +1,23 @@
+{
+  "id": "codex",
+  "version": "1.0.0",
+  "name": "OpenAI Codex CLI",
+  "description": "Installs OpenAI Codex CLI and shares host credentials with the devcontainer",
+  "documentationURL": "https://github.com/lucasacoutinho/devcontainer-features/tree/main/src/codex",
+  "keywords": ["codex", "openai", "ai", "cli", "credentials"],
+  "options": {
+    "version": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of Codex CLI to install"
+    }
+  },
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.codex",
+      "target": "/home/${_REMOTE_USER}/.codex",
+      "type": "bind"
+    }
+  ],
+  "installsAfter": ["ghcr.io/devcontainers/features/node"]
+}

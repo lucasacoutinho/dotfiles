@@ -1,0 +1,36 @@
+{
+  "id": "claude-code",
+  "version": "1.0.0",
+  "name": "Claude Code CLI",
+  "description": "Installs Claude Code CLI and shares host credentials/settings with the devcontainer",
+  "documentationURL": "https://github.com/lucasacoutinho/devcontainer-features/tree/main/src/claude-code",
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai",
+    "cli",
+    "credentials"
+  ],
+  "options": {
+    "version": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of Claude Code CLI to install (e.g., 'latest', '1.0.3')"
+    }
+  },
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.claude",
+      "target": "/home/${_REMOTE_USER}/.claude",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.claude.json",
+      "target": "/home/${_REMOTE_USER}/.claude.json",
+      "type": "bind"
+    }
+  ],
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ]
+}
