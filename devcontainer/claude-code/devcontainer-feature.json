@@ -1,9 +1,9 @@
 {
   "id": "claude-code",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Claude Code CLI",
-  "description": "Installs Claude Code CLI and shares host credentials/settings with the devcontainer",
-  "documentationURL": "https://github.com/lucasacoutinho/devcontainer-features/tree/main/src/claude-code",
+  "description": "Installs Claude Code CLI and shares host credentials with the devcontainer",
+  "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/claude-code",
   "keywords": [
     "claude",
     "anthropic",
@@ -19,11 +19,6 @@
     }
   },
   "mounts": [
-    {
-      "source": "${localEnv:HOME}/.claude",
-      "target": "/home/${_REMOTE_USER}/.claude",
-      "type": "bind"
-    },
     {
       "source": "${localEnv:HOME}/.claude.json",
       "target": "/home/${_REMOTE_USER}/.claude.json",

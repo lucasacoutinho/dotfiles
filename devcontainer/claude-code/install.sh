@@ -50,26 +50,6 @@ else
     echo "WARNING: Claude CLI command not found in PATH after installation"
 fi
 
-# Create .claude directory on host if it doesn't exist (for first-time users)
-# Note: This runs at build time, so we create a placeholder script that runs at container start
-cat > /usr/local/bin/claude-code-init << 'EOF'
-#!/bin/bash
-# Initialize Claude Code directories if they don't exist on host
-# This is a helper script for first-time setup
-
-HOST_CLAUDE_DIR="${HOME}/.claude"
-HOST_CLAUDE_JSON="${HOME}/.claude.json"
-
-if [ ! -d "$HOST_CLAUDE_DIR" ]; then
-    echo "Note: ~/.claude directory not found. Run 'claude' on your host first to authenticate."
-fi
-
-if [ ! -f "$HOST_CLAUDE_JSON" ]; then
-    echo "Note: ~/.claude.json not found. Run 'claude' on your host first to authenticate."
-fi
-EOF
-chmod +x /usr/local/bin/claude-code-init
-
 echo "Claude Code feature installation complete!"
 echo ""
 echo "IMPORTANT: Make sure you have authenticated Claude Code on your HOST machine first:"
@@ -77,4 +57,5 @@ echo "  1. Run 'claude' on your host terminal"
 echo "  2. Complete the authentication flow"
 echo "  3. Rebuild your devcontainer"
 echo ""
-echo "Your host ~/.claude/ and ~/.claude.json will be mounted into this container."
+echo "Your host ~/.claude.json (auth) will be mounted into this container."
+echo "Skills and plugins will be managed inside the container via your dotfiles."
