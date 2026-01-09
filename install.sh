@@ -51,21 +51,19 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     sudo chsh -s "$ZSH_PATH" "$USER"
 fi
 
-# Install Claude Code skills (skip if ~/.claude is mounted from host with existing skills)
+# Install Claude Code skills (copy instead of symlink for container compatibility)
 if [ -d "$DOTFILES_DIR/.claude/skills" ]; then
-    # Check if ~/.claude/skills already has content (likely mounted from host)
-    if [ -d "$HOME/.claude/skills" ] && [ "$(ls -A $HOME/.claude/skills 2>/dev/null)" ]; then
-        echo "Skipping skill installation - ~/.claude/skills already populated (mounted from host)"
-    else
-        echo "Installing Claude Code skills..."
-        mkdir -p ~/.claude/skills
-        for skill_dir in "$DOTFILES_DIR/.claude/skills"/*; do
-            if [ -d "$skill_dir" ]; then
-                skill_name=$(basename "$skill_dir")
-                ln -sf "$skill_dir" "$HOME/.claude/skills/$skill_name"
-            fi
-        done
-    fi
+    echo "Installing Claude Code skills..."
+    mkdir -p ~/.claude/skills
+    for skill_dir in "$DOTFILES_DIR/.claude/skills"/*; do
+        if [ -d "$skill_dir" ]; then
+            skill_name=$(basename "$skill_dir")
+            # Remove existing symlink or directory, then copy fresh
+            rm -rf "$HOME/.claude/skills/$skill_name"
+            cp -r "$skill_dir" "$HOME/.claude/skills/$skill_name"
+            echo "  Installed skill: $skill_name"
+        fi
+    done
 fi
 
 echo "Done! Restart your shell or run: exec zsh"
