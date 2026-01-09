@@ -22,4 +22,14 @@ else
     npm install -g "@openai/codex@$VERSION"
 fi
 
-echo "Codex CLI installed. Authenticate on host first, then rebuild container."
+# Create symlinks from user home to mounted host directories
+REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
+
+if [ -d "/mnt/host-codex" ]; then
+    echo "Linking $REMOTE_HOME/.codex -> /mnt/host-codex"
+    rm -rf "$REMOTE_HOME/.codex" 2>/dev/null || true
+    ln -sf /mnt/host-codex "$REMOTE_HOME/.codex"
+    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.codex" 2>/dev/null || true
+fi
+
+echo "Codex CLI installed. Host ~/.codex mounted and symlinked."

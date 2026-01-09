@@ -1,6 +1,6 @@
 {
   "id": "claude-code",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "name": "Claude Code CLI",
   "description": "Installs Claude Code CLI and shares host ~/.claude (skills, plugins, settings) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/claude-code",
@@ -16,22 +16,17 @@
       "type": "string",
       "default": "latest",
       "description": "Version of Claude Code CLI to install (e.g., 'latest', '1.0.3')"
-    },
-    "remoteUser": {
-      "type": "string",
-      "default": "dev",
-      "description": "The remote user in the container (must match devcontainer.json remoteUser)"
     }
   },
   "mounts": [
     {
       "source": "${localEnv:HOME}/.claude",
-      "target": "/home/${remoteUser}/.claude",
+      "target": "/mnt/host-claude",
       "type": "bind"
     },
     {
       "source": "${localEnv:HOME}/.claude.json",
-      "target": "/home/${remoteUser}/.claude.json",
+      "target": "/mnt/host-claude.json",
       "type": "bind"
     }
   ],

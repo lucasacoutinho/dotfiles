@@ -50,12 +50,30 @@ else
     echo "WARNING: Claude CLI command not found in PATH after installation"
 fi
 
+# Create symlinks from user home to mounted host directories
+# _REMOTE_USER_HOME is set by devcontainer during feature install
+REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
+
+echo "Setting up symlinks for remote user home: $REMOTE_HOME"
+
+# Symlink ~/.claude -> /mnt/host-claude (if mount exists)
+if [ -d "/mnt/host-claude" ]; then
+    echo "Linking $REMOTE_HOME/.claude -> /mnt/host-claude"
+    rm -rf "$REMOTE_HOME/.claude" 2>/dev/null || true
+    ln -sf /mnt/host-claude "$REMOTE_HOME/.claude"
+    # Fix ownership for the symlink
+    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.claude" 2>/dev/null || true
+fi
+
+# Symlink ~/.claude.json -> /mnt/host-claude.json (if mount exists)
+if [ -f "/mnt/host-claude.json" ]; then
+    echo "Linking $REMOTE_HOME/.claude.json -> /mnt/host-claude.json"
+    rm -f "$REMOTE_HOME/.claude.json" 2>/dev/null || true
+    ln -sf /mnt/host-claude.json "$REMOTE_HOME/.claude.json"
+    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.claude.json" 2>/dev/null || true
+fi
+
 echo "Claude Code feature installation complete!"
 echo ""
-echo "IMPORTANT: Make sure you have authenticated Claude Code on your HOST machine first:"
-echo "  1. Run 'claude' on your host terminal"
-echo "  2. Complete the authentication flow"
-echo "  3. Rebuild your devcontainer"
-echo ""
-echo "Your host ~/.claude.json (auth) will be mounted into this container."
-echo "Skills and plugins will be managed inside the container via your dotfiles."
+echo "Host ~/.claude and ~/.claude.json are mounted and symlinked."
+echo "Your skills, plugins, and auth from the host are now available."

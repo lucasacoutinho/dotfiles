@@ -22,4 +22,14 @@ else
     npm install -g "@google/gemini-cli@$VERSION"
 fi
 
-echo "Gemini CLI installed. Authenticate on host first, then rebuild container."
+# Create symlinks from user home to mounted host directories
+REMOTE_HOME="${_REMOTE_USER_HOME:-/home/${_REMOTE_USER:-dev}}"
+
+if [ -d "/mnt/host-gemini" ]; then
+    echo "Linking $REMOTE_HOME/.gemini -> /mnt/host-gemini"
+    rm -rf "$REMOTE_HOME/.gemini" 2>/dev/null || true
+    ln -sf /mnt/host-gemini "$REMOTE_HOME/.gemini"
+    chown -h "${_REMOTE_USER:-dev}:${_REMOTE_USER:-dev}" "$REMOTE_HOME/.gemini" 2>/dev/null || true
+fi
+
+echo "Gemini CLI installed. Host ~/.gemini mounted and symlinked."
