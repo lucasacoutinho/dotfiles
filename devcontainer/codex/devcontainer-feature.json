@@ -1,6 +1,6 @@
 {
   "id": "codex",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "OpenAI Codex CLI",
   "description": "Installs OpenAI Codex CLI and shares host ~/.codex (auth, config, sessions) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/codex",
@@ -10,12 +10,17 @@
       "type": "string",
       "default": "latest",
       "description": "Version of Codex CLI to install"
+    },
+    "remoteUser": {
+      "type": "string",
+      "default": "dev",
+      "description": "The remote user in the container (must match devcontainer.json remoteUser)"
     }
   },
   "mounts": [
     {
       "source": "${localEnv:HOME}/.codex",
-      "target": "/home/${_REMOTE_USER}/.codex",
+      "target": "/home/${remoteUser}/.codex",
       "type": "bind"
     }
   ],

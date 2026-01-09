@@ -1,6 +1,6 @@
 {
   "id": "gemini-cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "Google Gemini CLI",
   "description": "Installs Google Gemini CLI and shares host ~/.gemini (auth, settings) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/gemini-cli",
@@ -10,12 +10,17 @@
       "type": "string",
       "default": "latest",
       "description": "Version of Gemini CLI to install"
+    },
+    "remoteUser": {
+      "type": "string",
+      "default": "dev",
+      "description": "The remote user in the container (must match devcontainer.json remoteUser)"
     }
   },
   "mounts": [
     {
       "source": "${localEnv:HOME}/.gemini",
-      "target": "/home/${_REMOTE_USER}/.gemini",
+      "target": "/home/${remoteUser}/.gemini",
       "type": "bind"
     }
   ],
