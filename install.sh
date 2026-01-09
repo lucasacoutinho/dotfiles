@@ -51,16 +51,21 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     sudo chsh -s "$ZSH_PATH" "$USER"
 fi
 
-# Install Claude Code skills
+# Install Claude Code skills (skip if ~/.claude is mounted from host with existing skills)
 if [ -d "$DOTFILES_DIR/.claude/skills" ]; then
-    echo "Installing Claude Code skills..."
-    mkdir -p ~/.claude/skills
-    for skill_dir in "$DOTFILES_DIR/.claude/skills"/*; do
-        if [ -d "$skill_dir" ]; then
-            skill_name=$(basename "$skill_dir")
-            ln -sf "$skill_dir" "$HOME/.claude/skills/$skill_name"
-        fi
-    done
+    # Check if ~/.claude/skills already has content (likely mounted from host)
+    if [ -d "$HOME/.claude/skills" ] && [ "$(ls -A $HOME/.claude/skills 2>/dev/null)" ]; then
+        echo "Skipping skill installation - ~/.claude/skills already populated (mounted from host)"
+    else
+        echo "Installing Claude Code skills..."
+        mkdir -p ~/.claude/skills
+        for skill_dir in "$DOTFILES_DIR/.claude/skills"/*; do
+            if [ -d "$skill_dir" ]; then
+                skill_name=$(basename "$skill_dir")
+                ln -sf "$skill_dir" "$HOME/.claude/skills/$skill_name"
+            fi
+        done
+    fi
 fi
 
 echo "Done! Restart your shell or run: exec zsh"
