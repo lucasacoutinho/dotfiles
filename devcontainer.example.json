@@ -14,7 +14,10 @@
         "fp-checkout-cart-frontend"
     ],
     "features": {
-        "ghcr.io/lucasacoutinho/dotfiles/claude-code:latest": {}
+        "ghcr.io/lucasacoutinho/dotfiles/claude-code:latest": {},
+        "ghcr.io/lucasacoutinho/dotfiles/gemini-cli:latest": {},
+        "ghcr.io/lucasacoutinho/dotfiles/opencode:latest": {},
+        "ghcr.io/lucasacoutinho/dotfiles/codex:latest": {}
     },
     "customizations": {
         "vscode": {
@@ -45,8 +48,7 @@
                 "[php]": {
                     "editor.tabSize": 4,
                     "editor.defaultFormatter": "bmewburn.vscode-intelephense-client",
-                    "editor.formatOnSave": true,
-                    "intelephense.licenceKey": "00HJSNHSV4QKGK0"
+                    "editor.formatOnSave": true
                 },
                 "php.validate.executablePath": "/usr/local/bin/php",
                 "terminal.integrated.defaultProfile.linux": "zsh",

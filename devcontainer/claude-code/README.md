@@ -2,6 +2,8 @@
 
 Installs the [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) and shares your host machine's Claude credentials with the devcontainer.
 
+If you need a container that does not inherit any host Claude auth or settings, use `ghcr.io/lucasacoutinho/devcontainer-features/claude-code-isolated:1` instead.
+
 ## Features
 
 - **Credential Sharing**: Mounts your host's `~/.claude/` and `~/.claude.json` into the container

@@ -1,6 +1,6 @@
 # Dotfiles
 
-Unified development environment: Nix tooling + Devcontainer features + Claude Code skills.
+Unified development environment: Nix tooling + devcontainer features.
 
 ## Quick Install
 
@@ -21,21 +21,14 @@ git clone https://github.com/lucasacoutinho/dotfiles.git ~/personal/dotfiles
 
 ### Devcontainer Features (`devcontainer/`)
 
-AI CLI tools with credential mounting:
+AI CLI tools in two modes:
 
-- `claude-code` - Anthropic Claude Code CLI
-- `codex` - OpenAI Codex CLI
-- `gemini-cli` - Google Gemini CLI
+- Shared-host-auth: `claude-code`, `codex`, `gemini-cli`, `opencode`
+- Isolated/no-host-secrets: `claude-code-isolated`, `codex-isolated`, `gemini-cli-isolated`, `opencode-isolated`
 
-### Claude Code Skills (`.claude/skills/`)
+### Claude Code
 
-Personal workflow skills:
-
-- `advise` - Search project knowledge before starting work
-- `retrospective` - Document completed features for future reference
-- `autodoc` - Auto-generate documentation from git changes
-- `curl-generate` - Generate curl commands from conversation context
-- `file-organizer` - Intelligently organize files and folders
+- Project hooks in `.claude/settings.json` block direct host-side language/package-manager commands and push Claude toward `docker compose exec ...` when you are outside the devcontainer
 
 ## Usage in Devcontainers
 
@@ -50,6 +43,21 @@ See `devcontainer.example.json` or add to your `devcontainer.json`:
 }
 ```
 
+Keep editor secrets out of tracked config. For example, set `intelephense.licenceKey` only in an untracked local file such as `.vscode/settings.json`.
+
+For company-managed containers or customer environments, use the isolated features instead of the shared host-auth variants:
+
+```json
+{
+  "features": {
+    "ghcr.io/lucasacoutinho/devcontainer-features/claude-code-isolated:1": {},
+    "ghcr.io/lucasacoutinho/devcontainer-features/codex-isolated:1": {},
+    "ghcr.io/lucasacoutinho/devcontainer-features/gemini-cli-isolated:1": {},
+    "ghcr.io/lucasacoutinho/devcontainer-features/opencode-isolated:1": {}
+  }
+}
+```
+
 ## Customizing
 
 ### Add Nix packages
@@ -60,22 +68,27 @@ Edit `home.nix` and run:
 home-manager switch
 ```
 
-### Add Claude skills
+### Adjust host-specific settings
 
-Create a new skill in `.claude/skills/<skill-name>/SKILL.md` and re-run `./install.sh` to symlink it.
+Edit `hosts/default.nix` for user, home directory, git identity, signing key, and machine-specific paths like `KUBECONFIG`.
 
 ## Structure
 
 ```
 dotfiles/
 ├── home.nix                 # Nix/Home Manager config
+├── hosts/default.nix        # Host-specific identity and machine paths
 ├── install.sh               # Installation script
 ├── devcontainer.example.json
 ├── devcontainer/            # Devcontainer features
 │   ├── claude-code/
+│   ├── claude-code-isolated/
 │   ├── codex/
-│   └── gemini-cli/
-├── .claude/
-│   └── skills/              # Claude Code skills
+│   ├── codex-isolated/
+│   ├── gemini-cli/
+│   ├── gemini-cli-isolated/
+│   ├── opencode/
+│   └── opencode-isolated/
+├── .claude/settings.json    # Claude Code project hooks
 └── .github/workflows/       # Feature release automation
 ```

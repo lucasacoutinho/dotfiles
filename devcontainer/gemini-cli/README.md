@@ -2,6 +2,8 @@
 
 Installs the [Google Gemini CLI](https://github.com/google-gemini/gemini-cli) and shares host credentials with devcontainers.
 
+If you need a container that does not inherit any host Gemini auth or settings, use `ghcr.io/lucasacoutinho/devcontainer-features/gemini-cli-isolated:1` instead.
+
 ## Usage
 
 ```json

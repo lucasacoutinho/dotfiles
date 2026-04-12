@@ -2,6 +2,8 @@
 
 Installs the [OpenAI Codex CLI](https://github.com/openai/codex) and shares host credentials with devcontainers.
 
+If you need a container that does not inherit any host Codex auth or settings, use `ghcr.io/lucasacoutinho/devcontainer-features/codex-isolated:1` instead.
+
 ## Usage
 
 ```json
