@@ -289,6 +289,9 @@ in
   };
 
   # Bash (minimal, for scripts/fallback)
+  home.file.".bashrc".force = true;
+  home.file.".profile".force = true;
+
   programs.bash = {
     enable = true;
     historySize = 50000;
