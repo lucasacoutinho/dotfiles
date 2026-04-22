@@ -5,7 +5,7 @@ let
   gitConfig = local.git or { };
   kubeconfig = local.kubeconfig or null;
   dotfilesDir = local.dotfilesDir or "${local.homeDirectory}/personal/dotfiles";
-  hmSwitchCommand = "home-manager switch --flake path:${dotfilesDir}#default";
+  hmSwitchCommand = "home-manager switch --impure --flake path:${dotfilesDir}#default";
 in
 {
   home.username = local.username;

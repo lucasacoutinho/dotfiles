@@ -4,6 +4,7 @@ set -euo pipefail
 echo "Installing dotfiles..."
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export DOTFILES_DIR
 NIX_CONF_DIR="$HOME/.config/nix"
 NIX_CONF_FILE="$NIX_CONF_DIR/nix.conf"
 
@@ -33,7 +34,7 @@ fi
 
 # Build/apply Home Manager from the flake lock instead of a moving branch.
 echo "Applying Home Manager configuration from the pinned flake..."
-ACTIVATION_PACKAGE="$(nix build --no-link --print-out-paths "path:$DOTFILES_DIR#homeConfigurations.default.activationPackage")"
+ACTIVATION_PACKAGE="$(nix build --impure --no-link --print-out-paths "path:$DOTFILES_DIR#homeConfigurations.default.activationPackage")"
 "$ACTIVATION_PACKAGE/activate"
 
 # Optionally set zsh as the default shell.
