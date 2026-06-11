@@ -3,6 +3,32 @@ set -euo pipefail
 
 echo "Installing dotfiles..."
 
+# Bootstrap prerequisites for the Nix installer (curl, xz, git) with whatever
+# distro package manager exists. Everything after this point comes from Nix.
+missing=""
+for tool in curl xz git; do
+    command -v "$tool" &> /dev/null || missing="$missing $tool"
+done
+if [ -n "$missing" ]; then
+    echo "Installing prerequisites:$missing"
+    SUDO=""
+    [ "$(id -u)" -ne 0 ] && SUDO="sudo"
+    if command -v apt-get &> /dev/null; then
+        $SUDO apt-get update && $SUDO apt-get install -y curl xz-utils git
+    elif command -v apk &> /dev/null; then
+        $SUDO apk add --no-cache curl xz git
+    elif command -v dnf &> /dev/null; then
+        $SUDO dnf install -y curl xz git
+    elif command -v yum &> /dev/null; then
+        $SUDO yum install -y curl xz git
+    elif command -v pacman &> /dev/null; then
+        $SUDO pacman -Sy --noconfirm curl xz git
+    else
+        echo "ERROR: missing$missing and no supported package manager found. Install them manually." >&2
+        exit 1
+    fi
+fi
+
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DOTFILES_DIR
 NIX_CONF_DIR="$HOME/.config/nix"
@@ -36,6 +62,21 @@ fi
 echo "Applying Home Manager configuration from the pinned flake..."
 ACTIVATION_PACKAGE="$(nix build --impure --no-link --print-out-paths "path:$DOTFILES_DIR#homeConfigurations.default.activationPackage")"
 "$ACTIVATION_PACKAGE/activate"
+
+# Expose zsh at a user-independent path so editor configs (e.g. VS Code
+# terminal profiles) don't need to hardcode /home/<user>/.nix-profile/bin/zsh.
+NIX_ZSH="$HOME/.nix-profile/bin/zsh"
+if [ -x "$NIX_ZSH" ] && [ ! -e /usr/local/bin/zsh ]; then
+    if [ -w /usr/local/bin ]; then
+        ln -sf "$NIX_ZSH" /usr/local/bin/zsh
+        echo "Linked /usr/local/bin/zsh -> $NIX_ZSH"
+    elif sudo -n true 2>/dev/null; then
+        sudo -n ln -sf "$NIX_ZSH" /usr/local/bin/zsh
+        echo "Linked /usr/local/bin/zsh -> $NIX_ZSH"
+    else
+        echo "Note: skipping /usr/local/bin/zsh symlink (no write access, no passwordless sudo)."
+    fi
+fi
 
 # Optionally set zsh as the default shell.
 if [ "$SHELL" != "$(command -v zsh)" ]; then

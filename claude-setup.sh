@@ -24,8 +24,13 @@ for p in superpowers double-shot-latte elements-of-style episodic-memory \
   claude /plugin install "$p@superpowers-marketplace"
 done
 
-# Settings
+# Settings — merge instead of overwrite so statusLine, hooks, etc. survive
 mkdir -p ~/.claude
-echo '{"alwaysThinkingEnabled":true}' > ~/.claude/settings.json
+if [ -s ~/.claude/settings.json ]; then
+  tmp="$(mktemp)"
+  jq '. + {alwaysThinkingEnabled: true}' ~/.claude/settings.json > "$tmp" && mv "$tmp" ~/.claude/settings.json
+else
+  echo '{"alwaysThinkingEnabled":true}' > ~/.claude/settings.json
+fi
 
 echo "Done! Restart Claude Code."
