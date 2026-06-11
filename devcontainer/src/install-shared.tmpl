@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
+# __TOOL_NAME__ Devcontainer Feature
+# Installs the __TOOL_NAME__ and shares host credentials/config with the devcontainer
+
+echo "Installing __TOOL_NAME__..."
+
+# VERSION option from devcontainer-feature.json (default: "latest")
+VERSION="${VERSION:-latest}"
+
+__NODE_BOOTSTRAP__
+
+echo "Node.js version: $(node --version)"
+echo "npm version: $(npm --version)"
+
+# Install __TOOL_NAME__ globally
+if [ "$VERSION" = "latest" ]; then
+    echo "Installing __TOOL_NAME__ (latest)..."
+    npm install -g __NPM_PKG__
+else
+    echo "Installing __TOOL_NAME__ version: $VERSION..."
+    npm install -g "__NPM_PKG__@$VERSION"
+fi
+
+# Verify installation
+if command -v __BIN__ &> /dev/null; then
+    echo "__TOOL_NAME__ installed successfully!"
+    __BIN__ --version || true
+else
+    echo "WARNING: __BIN__ not found in PATH after installation"
+fi
+
+# Create a script that runs at container start to set up symlinks
+# (Mounts don't exist at build time, only at runtime)
+cat > /usr/local/bin/__SETUP_BIN__ << 'SETUP_EOF'
+#!/bin/bash
+__SETUP_BODY__
+SETUP_EOF
+chmod +x /usr/local/bin/__SETUP_BIN__
+
+# profile.d fallback for plain-docker runs; devcontainers also run this via
+# the feature's postStartCommand, which works regardless of login shell.
+cat > /etc/profile.d/__SETUP_BIN__.sh << 'PROFILE_EOF'
+#!/bin/bash
+if [ -x /usr/local/bin/__SETUP_BIN__ ]; then
+    /usr/local/bin/__SETUP_BIN__ 2>/dev/null
+fi
+PROFILE_EOF
+chmod +x /etc/profile.d/__SETUP_BIN__.sh
+
+echo "__TOOL_NAME__ feature installation complete!"
+echo "Host mounts will be symlinked at container start."

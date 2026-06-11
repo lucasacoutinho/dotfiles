@@ -1,0 +1,45 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check generated features are up to date
+        run: |
+          ./devcontainer/generate.sh
+          if ! git diff --exit-code devcontainer/; then
+            echo "::error::Generated features are stale. Run ./devcontainer/generate.sh and commit the result."
+            exit 1
+          fi
+
+      - name: Shellcheck
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q shellcheck
+          shellcheck --severity=warning install.sh claude-setup.sh \
+            devcontainer/generate.sh devcontainer/*/install.sh
+
+      - name: Validate feature manifests
+        run: |
+          for j in devcontainer/*/devcontainer-feature.json; do
+            for key in id version name; do
+              jq -e ".$key" "$j" > /dev/null || { echo "::error::$j missing $key"; exit 1; }
+            done
+          done
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Evaluate Home Manager configuration
+        run: |
+          nix build --impure --dry-run \
+            "path:$PWD#homeConfigurations.default.activationPackage"

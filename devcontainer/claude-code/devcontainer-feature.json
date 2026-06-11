@@ -1,6 +1,6 @@
 {
   "id": "claude-code",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "name": "Claude Code CLI",
   "description": "Installs Claude Code CLI and shares host ~/.claude (skills, plugins, settings) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/claude-code",
@@ -32,5 +32,6 @@
   ],
   "installsAfter": [
     "ghcr.io/devcontainers/features/node"
-  ]
+  ],
+  "postStartCommand": "/usr/local/bin/claude-code-setup"
 }

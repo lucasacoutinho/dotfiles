@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
+# __TOOL_NAME__ Devcontainer Feature (isolated)
+# Installs the __TOOL_NAME__ without mounting any host credentials or config
+
+echo "Installing __TOOL_NAME__ (isolated mode)..."
+
+# VERSION option from devcontainer-feature.json (default: "latest")
+VERSION="${VERSION:-latest}"
+
+__NODE_BOOTSTRAP__
+
+echo "Node.js version: $(node --version)"
+echo "npm version: $(npm --version)"
+
+# Install __TOOL_NAME__ globally
+if [ "$VERSION" = "latest" ]; then
+    npm install -g __NPM_PKG__
+else
+    npm install -g "__NPM_PKG__@$VERSION"
+fi
+
+# Verify installation
+if command -v __BIN__ &> /dev/null; then
+    echo "__TOOL_NAME__ installed successfully!"
+    __BIN__ --version || true
+else
+    echo "WARNING: __BIN__ not found in PATH after installation"
+fi
+
+echo "__TOOL_NAME__ isolated feature installation complete."
+echo "No host settings or credentials were mounted into this container."

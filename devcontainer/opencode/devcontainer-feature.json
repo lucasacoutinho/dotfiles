@@ -1,10 +1,16 @@
 {
   "id": "opencode",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "OpenCode CLI",
   "description": "Installs OpenCode CLI and shares host ~/.config/opencode (skills, settings, auth) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/opencode",
-  "keywords": ["opencode", "anomaly", "ai", "cli", "credentials"],
+  "keywords": [
+    "opencode",
+    "anomaly",
+    "ai",
+    "cli",
+    "credentials"
+  ],
   "options": {
     "version": {
       "type": "string",
@@ -24,5 +30,8 @@
       "type": "bind"
     }
   ],
-  "installsAfter": ["ghcr.io/devcontainers/features/node"]
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ],
+  "postStartCommand": "/usr/local/bin/opencode-setup"
 }

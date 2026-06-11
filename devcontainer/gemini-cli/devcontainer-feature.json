@@ -1,10 +1,16 @@
 {
   "id": "gemini-cli",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "name": "Google Gemini CLI",
   "description": "Installs Google Gemini CLI and shares host ~/.gemini (auth, settings) with the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/gemini-cli",
-  "keywords": ["gemini", "google", "ai", "cli", "credentials"],
+  "keywords": [
+    "gemini",
+    "google",
+    "ai",
+    "cli",
+    "credentials"
+  ],
   "options": {
     "version": {
       "type": "string",
@@ -19,5 +25,8 @@
       "type": "bind"
     }
   ],
-  "installsAfter": ["ghcr.io/devcontainers/features/node"]
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ],
+  "postStartCommand": "/usr/local/bin/gemini-setup"
 }

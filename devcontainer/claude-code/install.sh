@@ -1,33 +1,50 @@
 #!/bin/bash
 set -e
 
+# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
 # Claude Code CLI Devcontainer Feature
-# Installs the Claude Code CLI and ensures host credentials are accessible
+# Installs the Claude Code CLI and shares host credentials/config with the devcontainer
 
 echo "Installing Claude Code CLI..."
 
 # VERSION option from devcontainer-feature.json (default: "latest")
 VERSION="${VERSION:-latest}"
 
-# Check if Node.js is available
+# Ensure Node.js >= 18 is available. When missing, install current LTS from
+# NodeSource on deb/rpm distros (their own repos lag years behind); Alpine
+# tracks upstream closely so its repo package is fine.
 if ! command -v node &> /dev/null; then
-    echo "Node.js not found. Installing Node.js..."
-
-    # Detect package manager and install Node.js
+    echo "Node.js not found. Installing Node.js 24.x..."
     if command -v apt-get &> /dev/null; then
         apt-get update
-        apt-get install -y nodejs npm
+        apt-get install -y curl ca-certificates
+        curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+        apt-get install -y nodejs
     elif command -v apk &> /dev/null; then
+        # Alpine 3.18+ ships Node >= 18; the version check below catches older releases
         apk add --no-cache nodejs npm
-    elif command -v yum &> /dev/null; then
-        yum install -y nodejs npm
     elif command -v dnf &> /dev/null; then
-        dnf install -y nodejs npm
+        command -v curl &> /dev/null || dnf install -y curl
+        curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
+        dnf install -y nodejs
+    elif command -v yum &> /dev/null; then
+        command -v curl &> /dev/null || yum install -y curl
+        curl -fsSL https://rpm.nodesource.com/setup_24.x | bash -
+        yum install -y nodejs
     else
         echo "ERROR: Unable to install Node.js. Please add the Node.js feature first:"
         echo '  "features": { "ghcr.io/devcontainers/features/node:1": {} }'
         exit 1
     fi
+fi
+
+# A preexisting Node belongs to the image; refuse rather than replace it.
+NODE_MAJOR="$(node --version | sed 's/^v\([0-9]*\).*/\1/')"
+if [ "${NODE_MAJOR:-0}" -lt 18 ]; then
+    echo "ERROR: Node.js $(node --version) is too old (need >= 18)."
+    echo "Add the Node.js feature to your devcontainer.json:"
+    echo '  "features": { "ghcr.io/devcontainers/features/node:1": {} }'
+    exit 1
 fi
 
 echo "Node.js version: $(node --version)"
@@ -47,7 +64,7 @@ if command -v claude &> /dev/null; then
     echo "Claude Code CLI installed successfully!"
     claude --version || true
 else
-    echo "WARNING: Claude CLI command not found in PATH after installation"
+    echo "WARNING: claude not found in PATH after installation"
 fi
 
 # Create a script that runs at container start to set up symlinks
@@ -72,9 +89,13 @@ if [ -d "/mnt/host-claude" ]; then
     if [ -n "$HOST_CLAUDE_PATH" ] && [ "$HOST_CLAUDE_PATH" != "$HOME/.claude" ]; then
         HOST_USER_HOME=$(dirname "$HOST_CLAUDE_PATH")
         if [ ! -d "$HOST_USER_HOME" ]; then
-            sudo mkdir -p "$HOST_USER_HOME" 2>/dev/null || true
-            sudo ln -sf /mnt/host-claude "$HOST_CLAUDE_PATH" 2>/dev/null || true
-            echo "Created compatibility symlink: $HOST_CLAUDE_PATH -> /mnt/host-claude"
+            if sudo -n mkdir -p "$HOST_USER_HOME" 2>/dev/null && \
+               sudo -n ln -sf /mnt/host-claude "$HOST_CLAUDE_PATH" 2>/dev/null; then
+                echo "Created compatibility symlink: $HOST_CLAUDE_PATH -> /mnt/host-claude"
+            else
+                echo "WARNING: could not create $HOST_CLAUDE_PATH (no passwordless sudo)."
+                echo "         Plugins installed with host paths under $HOST_USER_HOME may fail to load."
+            fi
         fi
     fi
 fi
@@ -93,15 +114,15 @@ fi
 SETUP_EOF
 chmod +x /usr/local/bin/claude-code-setup
 
-# Add to profile.d so it runs on login
+# profile.d fallback for plain-docker runs; devcontainers also run this via
+# the feature's postStartCommand, which works regardless of login shell.
 cat > /etc/profile.d/claude-code-setup.sh << 'PROFILE_EOF'
 #!/bin/bash
-# Run claude-code-setup once per session
 if [ -x /usr/local/bin/claude-code-setup ]; then
     /usr/local/bin/claude-code-setup 2>/dev/null
 fi
 PROFILE_EOF
 chmod +x /etc/profile.d/claude-code-setup.sh
 
-echo "Claude Code feature installation complete!"
-echo "Host mounts will be symlinked on first login."
+echo "Claude Code CLI feature installation complete!"
+echo "Host mounts will be symlinked at container start."

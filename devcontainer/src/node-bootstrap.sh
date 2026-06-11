@@ -1,15 +1,3 @@
-#!/bin/bash
-set -e
-
-# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
-# Claude Code CLI Devcontainer Feature (isolated)
-# Installs the Claude Code CLI without mounting any host credentials or config
-
-echo "Installing Claude Code CLI (isolated mode)..."
-
-# VERSION option from devcontainer-feature.json (default: "latest")
-VERSION="${VERSION:-latest}"
-
 # Ensure Node.js >= 18 is available. When missing, install current LTS from
 # NodeSource on deb/rpm distros (their own repos lag years behind); Alpine
 # tracks upstream closely so its repo package is fine.
@@ -46,24 +34,3 @@ if [ "${NODE_MAJOR:-0}" -lt 18 ]; then
     echo '  "features": { "ghcr.io/devcontainers/features/node:1": {} }'
     exit 1
 fi
-
-echo "Node.js version: $(node --version)"
-echo "npm version: $(npm --version)"
-
-# Install Claude Code CLI globally
-if [ "$VERSION" = "latest" ]; then
-    npm install -g @anthropic-ai/claude-code
-else
-    npm install -g "@anthropic-ai/claude-code@$VERSION"
-fi
-
-# Verify installation
-if command -v claude &> /dev/null; then
-    echo "Claude Code CLI installed successfully!"
-    claude --version || true
-else
-    echo "WARNING: claude not found in PATH after installation"
-fi
-
-echo "Claude Code CLI isolated feature installation complete."
-echo "No host settings or credentials were mounted into this container."

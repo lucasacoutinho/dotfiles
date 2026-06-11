@@ -1,10 +1,16 @@
 {
   "id": "opencode-isolated",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "OpenCode CLI (Isolated)",
   "description": "Installs OpenCode CLI without mounting host ~/.config/opencode or ~/.opencode into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/opencode-isolated",
-  "keywords": ["opencode", "anomaly", "ai", "cli", "isolated"],
+  "keywords": [
+    "opencode",
+    "anomaly",
+    "ai",
+    "cli",
+    "isolated"
+  ],
   "options": {
     "version": {
       "type": "string",
@@ -12,5 +18,7 @@
       "description": "Version of OpenCode CLI to install (e.g., 'latest', '1.0.0')"
     }
   },
-  "installsAfter": ["ghcr.io/devcontainers/features/node"]
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ]
 }

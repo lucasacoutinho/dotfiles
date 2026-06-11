@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Refuse to publish stale generated features
+        run: |
+          ./devcontainer/generate.sh
+          if ! git diff --exit-code devcontainer/; then
+            echo "::error::Generated features are stale. Run ./devcontainer/generate.sh and commit the result."
+            exit 1
+          fi
+
       - name: Publish Features
         uses: devcontainers/action@v1
         with:
