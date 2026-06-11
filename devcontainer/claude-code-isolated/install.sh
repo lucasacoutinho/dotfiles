@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
+# GENERATED FILE — do not edit. Edit devcontainer-src/* and run devcontainer-src/generate.sh.
 # Claude Code CLI Devcontainer Feature (isolated)
 # Installs the Claude Code CLI without mounting any host credentials or config
 

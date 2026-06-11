@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# GENERATED FILE — do not edit. Edit devcontainer/src/* and run devcontainer/generate.sh.
+# GENERATED FILE — do not edit. Edit devcontainer-src/* and run devcontainer-src/generate.sh.
 # OpenAI Codex CLI Devcontainer Feature
 # Installs the OpenAI Codex CLI and shares host credentials/config with the devcontainer
 

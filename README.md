@@ -123,11 +123,13 @@ Set `DOTFILES_PROFILE=minimal` (e.g. via `containerEnv` in `devcontainer.json`) 
 
 ### Developing the devcontainer features
 
-The per-feature `install.sh` files are generated. Edit the sources in `devcontainer/src/` (shared templates, Node bootstrap, per-tool setup scripts) and run:
+The per-feature `install.sh` files are generated. Edit the sources in `devcontainer-src/` (shared templates, Node bootstrap, per-tool setup scripts) and run:
 
 ```bash
-./devcontainer/generate.sh
+./devcontainer-src/generate.sh
 ```
+
+The sources live outside `devcontainer/` because the publish action treats every subdirectory there as a feature.
 
 CI refuses to publish if generated files are stale. The `devcontainer-feature.json` manifests are hand-authored — mounts and lifecycle hooks genuinely differ per tool.
 
@@ -139,9 +141,9 @@ dotfiles/
 ├── hosts/default.nix        # Host-specific identity and machine paths
 ├── install.sh               # Installation script
 ├── devcontainer.example.json
-├── devcontainer/            # Devcontainer features
-│   ├── src/                 # Templates + per-tool setup scripts (edit these)
-│   ├── generate.sh          # Regenerates every feature's install.sh
+├── devcontainer-src/        # Feature templates + per-tool setup (edit these)
+│   └── generate.sh          # Regenerates every feature's install.sh
+├── devcontainer/            # Published devcontainer features
 │   ├── claude-code/         # Generated install.sh + hand-authored manifest
 │   ├── claude-code-isolated/
 │   ├── codex/

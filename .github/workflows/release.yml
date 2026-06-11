@@ -20,9 +20,9 @@ jobs:
 
       - name: Refuse to publish stale generated features
         run: |
-          ./devcontainer/generate.sh
+          ./devcontainer-src/generate.sh
           if ! git diff --exit-code devcontainer/; then
-            echo "::error::Generated features are stale. Run ./devcontainer/generate.sh and commit the result."
+            echo "::error::Generated features are stale. Run ./devcontainer-src/generate.sh and commit the result."
             exit 1
           fi
 

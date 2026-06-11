@@ -15,9 +15,9 @@ jobs:
 
       - name: Check generated features are up to date
         run: |
-          ./devcontainer/generate.sh
+          ./devcontainer-src/generate.sh
           if ! git diff --exit-code devcontainer/; then
-            echo "::error::Generated features are stale. Run ./devcontainer/generate.sh and commit the result."
+            echo "::error::Generated features are stale. Run ./devcontainer-src/generate.sh and commit the result."
             exit 1
           fi
 
@@ -26,7 +26,7 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q shellcheck
           shellcheck --severity=warning install.sh claude-setup.sh \
-            devcontainer/generate.sh devcontainer/*/install.sh
+            devcontainer-src/generate.sh devcontainer/*/install.sh
 
       - name: Validate feature manifests
         run: |
