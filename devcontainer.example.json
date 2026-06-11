@@ -4,6 +4,10 @@
     "service": "fp-checkout-backend",
     "remoteUser": "dev",
     "workspaceFolder": "/var/www/html/app",
+    "initializeCommand": "mkdir -p ~/.claude && touch ~/.claude.json",
+    "containerEnv": {
+        "DOTFILES_PROFILE": "minimal"
+    },
     "runServices": [
         "fp-checkout-server",
         "fp-checkout-redis",
@@ -14,10 +18,10 @@
         "fp-checkout-cart-frontend"
     ],
     "features": {
-        "ghcr.io/lucasacoutinho/dotfiles/claude-code:latest": {},
-        "ghcr.io/lucasacoutinho/dotfiles/gemini-cli:latest": {},
-        "ghcr.io/lucasacoutinho/dotfiles/opencode:latest": {},
-        "ghcr.io/lucasacoutinho/dotfiles/codex:latest": {}
+        "ghcr.io/lucasacoutinho/dotfiles/claude-code:1": {},
+        "ghcr.io/lucasacoutinho/dotfiles/gemini-cli:1": {},
+        "ghcr.io/lucasacoutinho/dotfiles/opencode:1": {},
+        "ghcr.io/lucasacoutinho/dotfiles/codex:1": {}
     },
     "customizations": {
         "vscode": {
@@ -54,7 +58,7 @@
                 "terminal.integrated.defaultProfile.linux": "zsh",
                 "terminal.integrated.profiles.linux": {
                     "zsh": {
-                        "path": "/home/dev/.nix-profile/bin/zsh"
+                        "path": "/usr/local/bin/zsh"
                     }
                 }
             }

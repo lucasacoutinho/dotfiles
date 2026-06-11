@@ -5,6 +5,7 @@ let
   gitConfig = local.git or { };
   kubeconfig = local.kubeconfig or null;
   dotfilesDir = local.dotfilesDir or "${local.homeDirectory}/personal/dotfiles";
+  isMinimal = (local.profile or "full") == "minimal";
   hmSwitchCommand = "home-manager switch --impure --flake path:${dotfilesDir}#default";
 in
 {
@@ -22,13 +23,20 @@ in
     EZA_COLORS = "di=1;34:ln=1;36:ex=1;32";
     EDITOR = "nano";
     VISUAL = "nano";
-    NVM_DIR = "${local.homeDirectory}/.nvm";
   } // lib.optionalAttrs (kubeconfig != null && kubeconfig != "") {
     KUBECONFIG = kubeconfig;
   };
 
-  # Packages
-  home.packages = with pkgs; [
+  # Packages — the infra/devops group is skipped when DOTFILES_PROFILE=minimal
+  # (project devcontainers usually only need the shell quality-of-life tools).
+  home.packages = with pkgs; lib.optionals (!isMinimal) [
+    # Infrastructure / DevOps
+    k9s          # Kubernetes TUI
+    talosctl     # Talos Linux management
+    ansible      # Configuration management
+    ansible-lint # Ansible linting
+    opam         # OCaml package manager
+  ] ++ [
     # Modern CLI tools
     ripgrep      # Fast grep
     fd           # Fast find
@@ -49,12 +57,8 @@ in
     tree-sitter  # Incremental parsing
     universal-ctags  # Code navigation tags
 
-    # Infrastructure / DevOps
-    k9s          # Kubernetes TUI
-    talosctl     # Talos Linux management
-    ansible      # Configuration management
-    ansible-lint # Ansible linting
-    opam         # OCaml package manager
+    # JS runtimes
+    nodejs_24
     bun
   ];
 
@@ -91,43 +95,6 @@ in
     };
 
     initContent = ''
-      # NVM - Lazy loading for faster shell startup
-      if [ -s "$NVM_DIR/nvm.sh" ]; then
-        # Add node to PATH without loading nvm (if default version exists)
-        if [ -d "$NVM_DIR/versions/node" ]; then
-          node_bin="$(command ls -1d "$NVM_DIR"/versions/node/*/bin 2>/dev/null | tail -1)"
-          if [ -n "$node_bin" ]; then
-            case ":$PATH:" in
-              *":$node_bin:"*) ;;
-              *) export PATH="$node_bin:$PATH" ;;
-            esac
-          fi
-          unset node_bin
-        fi
-
-        # Lazy load nvm when first called
-        nvm() {
-          unset -f nvm node npm npx
-          source "$NVM_DIR/nvm.sh"
-          nvm "$@"
-        }
-        node() {
-          unset -f nvm node npm npx
-          source "$NVM_DIR/nvm.sh"
-          node "$@"
-        }
-        npm() {
-          unset -f nvm node npm npx
-          source "$NVM_DIR/nvm.sh"
-          npm "$@"
-        }
-        npx() {
-          unset -f nvm node npm npx
-          source "$NVM_DIR/nvm.sh"
-          npx "$@"
-        }
-      fi
-
       # Only load fzf widgets in real interactive TTY shells.
       if [[ -o interactive && -t 0 && -t 1 ]]; then
         source <(${pkgs.fzf}/bin/fzf --zsh)
@@ -159,8 +126,10 @@ in
           return 1
         fi
 
-        # Insert before the closing bracket of home.packages
-        sed -i "/^  \];$/i\\    $pkg" "$home_nix"
+        # Insert before the closing bracket of home.packages, range-scoped so
+        # other lists that also end in "];" (like sessionPath) are untouched
+        sed -i "/^  home\.packages =/,/^  \];$/{/^  \];$/i\\    $pkg
+        }" "$home_nix"
         echo "Added $pkg to home.nix"
 
         echo "Running home-manager switch..."
