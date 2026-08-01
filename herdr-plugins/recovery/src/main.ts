@@ -9,7 +9,12 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { join } from "node:path";
-import { captureTargets, mergeTargets, parseCheckpoint } from "./checkpoint";
+import {
+  captureTargets,
+  mergeTargets,
+  parseCheckpoint,
+  reconcileLiveTargets,
+} from "./checkpoint";
 import { loadConfig } from "./config";
 import { HerdrClient } from "./herdr";
 import {
@@ -224,8 +229,14 @@ async function checkpointLiveAgents(
   client: HerdrClient,
   config: Awaited<ReturnType<typeof loadConfig>>,
 ): Promise<void> {
-  const observed = await captureTargets(client, config);
-  const targets = await mergeCheckpoint(observed);
+  const [observed, panes] = await Promise.all([
+    captureTargets(client, config),
+    client.listPanes(),
+  ]);
+  const livePaneIds = new Set(panes.map((pane) => pane.pane_id));
+  const targets = await updateCheckpoint((current) => (
+    reconcileLiveTargets(current, observed, livePaneIds)
+  ));
   process.stdout.write(
     `Herdr recovery ${PLUGIN_VERSION}\nObserved live panes: ${observed.length}\nCheckpointed panes: ${targets.length}\n`,
   );
@@ -357,7 +368,7 @@ async function run(): Promise<void> {
   }
   if (command !== "audit" && command !== "recover" && command !== "startup") {
     throw new Error(
-      "Usage: main.ts <audit|recover|startup|checkpoint|checkpoint-event|last-report>",
+      "Usage: herdr-recovery <audit|recover|startup|checkpoint|checkpoint-event|last-report>",
     );
   }
 

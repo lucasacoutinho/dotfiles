@@ -6,6 +6,7 @@ let
   kubeconfig = local.kubeconfig or null;
   dotfilesDir = local.dotfilesDir or "${local.homeDirectory}/personal/dotfiles";
   herdrRecoveryPlugin = "${local.homeDirectory}/.local/share/herdr-plugins/recovery";
+  herdrRecoveryPackage = import ./nix/herdr-recovery.nix { inherit pkgs; };
   isMinimal = (local.profile or "full") == "minimal";
   hmSwitchCommand = "home-manager switch --impure --flake path:${dotfilesDir}#default";
 in
@@ -266,7 +267,7 @@ in
   home.file.".bashrc".force = true;
   home.file.".profile".force = true;
   home.file.".local/share/herdr-plugins/recovery" = lib.mkIf (!isMinimal) {
-    source = ./herdr-plugins/recovery;
+    source = herdrRecoveryPackage;
     recursive = true;
   };
 

@@ -41,8 +41,9 @@ herdr plugin action invoke lucas.recovery.last-report
 
 `audit` does not change panes. `recover` starts missing sessions and applies
 the configured replacement policy. `checkpoint` merges every currently
-verifiable live agent into the durable checkpoint. Agent-detected and
-pane-closed events keep it current between manual runs. Every recovery run
+verifiable live agent into the durable checkpoint and removes entries for panes
+that no longer exist. Agent-detected and pane-closed events keep it current
+between manual runs. Every recovery run
 stores a session-specific report in the plugin state directory with mode
 `0600`. Session-specific locks stop overlapping recovery and checkpoint writes.
 
@@ -55,6 +56,13 @@ The built-in defaults need no config file. To override them, copy
 config_dir="$(herdr plugin config-dir lucas.recovery)"
 cp ~/.local/share/herdr-plugins/recovery/config.example.json "$config_dir/config.json"
 ```
+
+Home Manager builds the plugin as a standalone Bun executable. The installed
+plugin runs `bin/herdr-recovery`; it does not load TypeScript or require Bun at
+runtime. For development, run `bun test`. The Nix package owns the production
+build because it supplies Bun's pristine upstream executable to `bun build
+--compile`; using the Nix-patched Bun executable as the embedded runtime makes
+the resulting standalone payload invalid.
 
 Set Claude's `resumeArgs` to the following only if every restored Claude pane
 should skip permission checks:

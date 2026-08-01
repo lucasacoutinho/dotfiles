@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { mergeTargets, parseCheckpoint } from "../src/checkpoint";
+import {
+  mergeTargets,
+  parseCheckpoint,
+  reconcileLiveTargets,
+} from "../src/checkpoint";
 import { DEFAULT_CONFIG } from "../src/config";
 import { targetFromPane } from "../src/core";
 import type { PaneInfo, RecoveryTarget } from "../src/types";
@@ -98,6 +102,14 @@ describe("durable checkpoint", () => {
     expect(mergeTargets(existing, [replacement])).toEqual([
       replacement,
       existing[1],
+    ]);
+  });
+
+  test("prunes checkpoint targets whose panes no longer exist", () => {
+    const existing = [target("w1:p1", "official"), target("w1:p2", "official")];
+    const replacement = target("w1:p1", "argv");
+    expect(reconcileLiveTargets(existing, [replacement], new Set(["w1:p1"]))).toEqual([
+      replacement,
     ]);
   });
 

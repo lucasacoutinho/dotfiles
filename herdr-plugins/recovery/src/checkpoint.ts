@@ -56,6 +56,16 @@ export function mergeTargets(
   ));
 }
 
+export function reconcileLiveTargets(
+  existing: RecoveryTarget[],
+  observed: RecoveryTarget[],
+  livePaneIds: Set<string>,
+): RecoveryTarget[] {
+  return mergeTargets(existing, observed).filter((target) => (
+    livePaneIds.has(target.paneId)
+  ));
+}
+
 async function mapLimit<T, R>(
   values: T[],
   limit: number,

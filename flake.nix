@@ -49,6 +49,7 @@
         inherit system;
         overlays = [ minimumBunOverlay ];
       };
+      herdrRecoveryPlugin = import ./nix/herdr-recovery.nix { inherit pkgs; };
     in
     {
       homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
@@ -57,7 +58,7 @@
       };
 
       checks.${system}.herdr-recovery = pkgs.runCommand "herdr-recovery-check" {
-        nativeBuildInputs = [ pkgs.bun pkgs.herdr pkgs.jq ];
+        nativeBuildInputs = [ pkgs.herdr pkgs.jq ];
       } ''
         export HOME="$TMPDIR/home"
         export XDG_CONFIG_HOME="$TMPDIR/config"
@@ -67,13 +68,8 @@
         export HERDR_SOCKET_PATH="$XDG_CONFIG_HOME/herdr/offline.sock"
 
         mkdir -p "$HOME"
-        cp -R ${./herdr-plugins/recovery} plugin
-        chmod -R u+w plugin
-        cd plugin
-
-        bun test
-        bun build src/main.ts --target=bun --outfile "$TMPDIR/herdr-recovery"
-        herdr plugin link "$PWD" --disabled >/dev/null
+        test -x ${herdrRecoveryPlugin}/bin/herdr-recovery
+        herdr plugin link ${herdrRecoveryPlugin} --disabled >/dev/null
         jq -e '
           length == 1
           and .[0].plugin_id == "lucas.recovery"
