@@ -9,7 +9,7 @@ Use this variant when the container must stay isolated from your personal `~/.ge
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/gemini-cli-isolated:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/gemini-cli-isolated:1": {}
   }
 }
 ```

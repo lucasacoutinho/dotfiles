@@ -9,7 +9,7 @@ Use this variant when the container must not inherit your host `~/.codex` state.
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/codex-isolated:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/codex-isolated:1": {}
   }
 }
 ```

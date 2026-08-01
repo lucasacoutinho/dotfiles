@@ -1,6 +1,6 @@
 {
   "id": "codex-isolated",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "OpenAI Codex CLI (Isolated)",
   "description": "Installs OpenAI Codex CLI without mounting host ~/.codex credentials or settings into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/codex-isolated",

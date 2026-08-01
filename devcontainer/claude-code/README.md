@@ -1,102 +1,38 @@
-# Claude Code CLI (claude-code)
+# Claude Code CLI
 
-Installs the [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) and shares your host machine's Claude credentials with the devcontainer.
+Installs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and makes
+the host login available inside a trusted devcontainer.
 
-If you need a container that does not inherit any host Claude auth or settings, use `ghcr.io/lucasacoutinho/devcontainer-features/claude-code-isolated:1` instead.
+## Auth boundary
 
-## Features
+The feature mounts only `~/.claude/.credentials.json`. It does not mount
+`~/.claude.json` or the rest of `~/.claude`, so host settings, skills, plugins,
+projects, history, caches, and session data stay outside the container.
 
-- **Credential Sharing**: Mounts your host's `~/.claude/` and `~/.claude.json` into the container
-- **CLI Installation**: Installs the `@anthropic-ai/claude-code` npm package globally
-- **No Re-authentication**: Use your existing Claude session across all devcontainers
+The credential mount is writable so Claude can persist token refreshes. The
+container can read the token, so use the isolated feature for untrusted images.
 
-## Prerequisites
+## Prerequisite
 
-**You must authenticate Claude Code on your HOST machine first:**
+Authenticate Claude Code on the host and confirm the credential file exists:
 
 ```bash
-# On your host terminal (not in devcontainer)
 claude
-# Follow the authentication prompts
+test -f ~/.claude/.credentials.json
 ```
-
-This creates `~/.claude/` and `~/.claude.json` which will be mounted into your devcontainers.
 
 ## Usage
 
-Add to your `devcontainer.json`:
-
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/claude-code:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/claude-code:1": {}
   }
 }
 ```
 
-### With Options
+The optional `version` setting defaults to `latest`. The container user must
+have the same UID as the host user to read and refresh the mounted file.
 
-```json
-{
-  "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/claude-code:1": {
-      "version": "1.0.3"
-    }
-  }
-}
-```
-
-## Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `version` | string | `latest` | Version of Claude Code CLI to install |
-
-## How It Works
-
-This feature:
-
-1. **Mounts credentials**: Binds your host's Claude config directories into the container
-   - `~/.claude/` - Settings, agents, session data
-   - `~/.claude.json` - OAuth tokens and authentication
-
-2. **Installs CLI**: Installs the Claude Code CLI via npm so you can run `claude` in the container
-
-3. **Preserves sessions**: Your authenticated session persists across container rebuilds
-
-## Troubleshooting
-
-### "Claude not authenticated" errors
-
-Ensure you've run `claude` on your **host machine** first and completed the authentication flow. Then rebuild your devcontainer.
-
-### Mount permission issues
-
-If you encounter permission errors, ensure your host's `~/.claude/` directory has appropriate permissions:
-
-```bash
-# On host
-chmod -R 755 ~/.claude
-chmod 644 ~/.claude.json
-```
-
-### Node.js not found
-
-This feature will attempt to install Node.js if not present. For best results, also include the Node.js feature:
-
-```json
-{
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {},
-    "ghcr.io/lucasacoutinho/devcontainer-features/claude-code:1": {}
-  }
-}
-```
-
-## Notes
-
-- This feature is designed for **Linux/macOS hosts** (including WSL)
-- The mounted directories use bind mounts, so changes in the container affect the host
-- Works with VS Code devcontainers, GitHub Codespaces*, and other devcontainer-compatible tools
-
-*GitHub Codespaces may have limited support for host mounts depending on your configuration.
+For no host authentication, use
+`ghcr.io/lucasacoutinho/dotfiles/claude-code-isolated:1`.

@@ -4,7 +4,7 @@
     "service": "fp-checkout-backend",
     "remoteUser": "dev",
     "workspaceFolder": "/var/www/html/app",
-    "initializeCommand": "mkdir -p ~/.claude && touch ~/.claude.json",
+    "initializeCommand": "sh -c 'test -f \"$HOME/.claude/.credentials.json\" && test -f \"$HOME/.codex/auth.json\" && test -f \"$HOME/.gemini/oauth_creds.json\" && test -f \"$HOME/.gemini/google_accounts.json\" && test -f \"$HOME/.local/share/opencode/auth.json\"'",
     "containerEnv": {
         "DOTFILES_PROFILE": "minimal"
     },

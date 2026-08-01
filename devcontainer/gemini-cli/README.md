@@ -1,36 +1,39 @@
 # Google Gemini CLI
 
-Installs the [Google Gemini CLI](https://github.com/google-gemini/gemini-cli) and shares host credentials with devcontainers.
+Installs the [Gemini CLI](https://github.com/google-gemini/gemini-cli) and
+makes the host login available inside a trusted devcontainer.
 
-If you need a container that does not inherit any host Gemini auth or settings, use `ghcr.io/lucasacoutinho/devcontainer-features/gemini-cli-isolated:1` instead.
+## Auth boundary
+
+The feature mounts only `~/.gemini/oauth_creds.json` and
+`~/.gemini/google_accounts.json`. It does not mount host settings, projects,
+history, extensions, or caches.
+
+The credential mounts are writable so Gemini can persist token refreshes. The
+container can read the tokens, so use the isolated feature for untrusted images.
+
+## Prerequisite
+
+Authenticate Gemini on the host and confirm the files exist:
+
+```bash
+gemini
+test -f ~/.gemini/oauth_creds.json
+test -f ~/.gemini/google_accounts.json
+```
 
 ## Usage
 
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/gemini-cli:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/gemini-cli:1": {}
   }
 }
 ```
 
-## Options
+The optional `version` setting defaults to `latest`. The container user must
+have the same UID as the host user to read and refresh the mounted files.
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `version` | `latest` | Version to install |
-
-## How It Works
-
-- Mounts host `~/.gemini/` into the container
-- Installs `@google/gemini-cli` CLI globally
-- No re-authentication needed across devcontainers
-
-## Prerequisites
-
-1. Authenticate on your **host machine** first:
-   ```bash
-   npm install -g @google/gemini-cli
-   gemini  # Complete OAuth setup
-   ```
-2. Rebuild your devcontainer
+For no host authentication, use
+`ghcr.io/lucasacoutinho/dotfiles/gemini-cli-isolated:1`.

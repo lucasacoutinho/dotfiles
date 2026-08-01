@@ -1,6 +1,6 @@
 {
   "id": "gemini-cli-isolated",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "Google Gemini CLI (Isolated)",
   "description": "Installs Google Gemini CLI without mounting host ~/.gemini credentials or settings into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/gemini-cli-isolated",

@@ -1,8 +1,8 @@
 {
   "id": "claude-code",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "name": "Claude Code CLI",
-  "description": "Installs Claude Code CLI and shares host ~/.claude (skills, plugins, settings) with the devcontainer",
+  "description": "Installs Claude Code CLI and mounts only host authentication into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/claude-code",
   "keywords": [
     "claude",
@@ -20,13 +20,8 @@
   },
   "mounts": [
     {
-      "source": "${localEnv:HOME}/.claude",
-      "target": "/mnt/host-claude",
-      "type": "bind"
-    },
-    {
-      "source": "${localEnv:HOME}/.claude.json",
-      "target": "/mnt/host-claude.json",
+      "source": "${localEnv:HOME}/.claude/.credentials.json",
+      "target": "/mnt/host-claude-credentials.json",
       "type": "bind"
     }
   ],

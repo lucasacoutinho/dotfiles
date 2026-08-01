@@ -1,6 +1,6 @@
 {
   "id": "opencode-isolated",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "OpenCode CLI (Isolated)",
   "description": "Installs OpenCode CLI without mounting host ~/.config/opencode or ~/.opencode into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/opencode-isolated",

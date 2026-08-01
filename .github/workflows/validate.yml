@@ -21,12 +21,17 @@ jobs:
             exit 1
           fi
 
+      - name: Check agent authentication boundary
+        run: ./devcontainer-src/validate-auth-boundary.sh
+
       - name: Shellcheck
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q shellcheck
-          shellcheck --severity=warning install.sh claude-setup.sh \
-            devcontainer-src/generate.sh devcontainer/*/install.sh
+          shellcheck --severity=warning install.sh update.sh claude-setup.sh \
+            devcontainer-src/generate.sh \
+            devcontainer-src/validate-auth-boundary.sh \
+            devcontainer/*/install.sh
 
       - name: Validate feature manifests
         run: |

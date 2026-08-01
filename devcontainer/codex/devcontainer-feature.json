@@ -1,8 +1,8 @@
 {
   "id": "codex",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "name": "OpenAI Codex CLI",
-  "description": "Installs OpenAI Codex CLI and shares host ~/.codex (auth, config, sessions) with the devcontainer",
+  "description": "Installs OpenAI Codex CLI and mounts only host authentication into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/codex",
   "keywords": [
     "codex",
@@ -20,8 +20,8 @@
   },
   "mounts": [
     {
-      "source": "${localEnv:HOME}/.codex",
-      "target": "/mnt/host-codex",
+      "source": "${localEnv:HOME}/.codex/auth.json",
+      "target": "/mnt/host-codex-auth.json",
       "type": "bind"
     }
   ],

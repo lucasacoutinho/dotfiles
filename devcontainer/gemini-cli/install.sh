@@ -3,7 +3,7 @@ set -e
 
 # GENERATED FILE — do not edit. Edit devcontainer-src/* and run devcontainer-src/generate.sh.
 # Gemini CLI Devcontainer Feature
-# Installs the Gemini CLI and shares host credentials/config with the devcontainer
+# Installs the Gemini CLI and shares only host authentication with the devcontainer
 
 echo "Installing Gemini CLI..."
 
@@ -71,10 +71,20 @@ fi
 # (Mounts don't exist at build time, only at runtime)
 cat > /usr/local/bin/gemini-setup << 'SETUP_EOF'
 #!/bin/bash
-if [ -d "/mnt/host-gemini" ] && [ ! -L "$HOME/.gemini" ]; then
-    rm -rf "$HOME/.gemini" 2>/dev/null || true
-    ln -sf /mnt/host-gemini "$HOME/.gemini"
-    echo "Linked ~/.gemini -> /mnt/host-gemini"
+# Link only Gemini authentication. The container keeps its own settings,
+# projects, history, extensions, and other state.
+mkdir -p "$HOME/.gemini"
+
+if [ -f "/mnt/host-gemini-oauth-creds.json" ]; then
+    ln -sfn /mnt/host-gemini-oauth-creds.json "$HOME/.gemini/oauth_creds.json"
+fi
+
+if [ -f "/mnt/host-gemini-google-accounts.json" ]; then
+    ln -sfn /mnt/host-gemini-google-accounts.json "$HOME/.gemini/google_accounts.json"
+fi
+
+if [ -L "$HOME/.gemini/oauth_creds.json" ]; then
+    echo "Linked Gemini credentials; container settings and context remain isolated"
 fi
 SETUP_EOF
 chmod +x /usr/local/bin/gemini-setup
@@ -90,4 +100,4 @@ PROFILE_EOF
 chmod +x /etc/profile.d/gemini-setup.sh
 
 echo "Gemini CLI feature installation complete!"
-echo "Host mounts will be symlinked at container start."
+echo "Host authentication will be linked at container start."

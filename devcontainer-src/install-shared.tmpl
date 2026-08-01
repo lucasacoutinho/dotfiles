@@ -3,7 +3,7 @@ set -e
 
 # GENERATED FILE — do not edit. Edit devcontainer-src/* and run devcontainer-src/generate.sh.
 # __TOOL_NAME__ Devcontainer Feature
-# Installs the __TOOL_NAME__ and shares host credentials/config with the devcontainer
+# Installs the __TOOL_NAME__ and shares only host authentication with the devcontainer
 
 echo "Installing __TOOL_NAME__..."
 
@@ -51,4 +51,4 @@ PROFILE_EOF
 chmod +x /etc/profile.d/__SETUP_BIN__.sh
 
 echo "__TOOL_NAME__ feature installation complete!"
-echo "Host mounts will be symlinked at container start."
+echo "Host authentication will be linked at container start."

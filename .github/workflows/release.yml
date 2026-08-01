@@ -26,6 +26,9 @@ jobs:
             exit 1
           fi
 
+      - name: Check agent authentication boundary
+        run: ./devcontainer-src/validate-auth-boundary.sh
+
       - name: Publish Features
         uses: devcontainers/action@v1
         with:

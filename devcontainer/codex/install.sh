@@ -3,7 +3,7 @@ set -e
 
 # GENERATED FILE — do not edit. Edit devcontainer-src/* and run devcontainer-src/generate.sh.
 # OpenAI Codex CLI Devcontainer Feature
-# Installs the OpenAI Codex CLI and shares host credentials/config with the devcontainer
+# Installs the OpenAI Codex CLI and shares only host authentication with the devcontainer
 
 echo "Installing OpenAI Codex CLI..."
 
@@ -71,10 +71,12 @@ fi
 # (Mounts don't exist at build time, only at runtime)
 cat > /usr/local/bin/codex-setup << 'SETUP_EOF'
 #!/bin/bash
-if [ -d "/mnt/host-codex" ] && [ ! -L "$HOME/.codex" ]; then
-    rm -rf "$HOME/.codex" 2>/dev/null || true
-    ln -sf /mnt/host-codex "$HOME/.codex"
-    echo "Linked ~/.codex -> /mnt/host-codex"
+# Link only Codex authentication. The container keeps its own config, skills,
+# sessions, memories, plugins, and other state.
+if [ -f "/mnt/host-codex-auth.json" ]; then
+    mkdir -p "$HOME/.codex"
+    ln -sfn /mnt/host-codex-auth.json "$HOME/.codex/auth.json"
+    echo "Linked Codex credentials; container settings and context remain isolated"
 fi
 SETUP_EOF
 chmod +x /usr/local/bin/codex-setup
@@ -90,4 +92,4 @@ PROFILE_EOF
 chmod +x /etc/profile.d/codex-setup.sh
 
 echo "OpenAI Codex CLI feature installation complete!"
-echo "Host mounts will be symlinked at container start."
+echo "Host authentication will be linked at container start."

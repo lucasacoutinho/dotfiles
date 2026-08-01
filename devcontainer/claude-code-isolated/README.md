@@ -9,7 +9,7 @@ Use this variant when the container must stay isolated from personal host creden
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/claude-code-isolated:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/claude-code-isolated:1": {}
   }
 }
 ```

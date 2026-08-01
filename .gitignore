@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 *.tgz
+result
 
 # OS files
 .DS_Store

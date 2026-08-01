@@ -18,13 +18,18 @@ git clone https://github.com/lucasacoutinho/dotfiles.git ~/personal/dotfiles
 - **Modern CLI tools**: ripgrep, fd, bat, eza, fzf, zoxide, jq, htop, tree
 - **Data processing**: yq, qsv
 - **Code analysis**: tokei, tree-sitter, universal-ctags
+- **Development runtimes**: Node.js, Bun, Herdr
 
 ### Devcontainer Features (`devcontainer/`)
 
 AI CLI tools in two modes:
 
-- Shared-host-auth: `claude-code`, `codex`, `gemini-cli`, `opencode`
+- Auth-only sharing: `claude-code`, `codex`, `gemini-cli`, `opencode`
 - Isolated/no-host-secrets: `claude-code-isolated`, `codex-isolated`, `gemini-cli-isolated`, `opencode-isolated`
+
+The auth-only features bind only each CLI's credential file. They do not share
+host settings, skills, plugins, MCP configuration, project context, history,
+sessions, caches, or memories. Each container starts with its own agent setup.
 
 ### Claude Code
 
@@ -50,7 +55,7 @@ Keep editor secrets out of tracked config. For example, set `intelephense.licenc
 
 ### UID/GID alignment (important for bind mounts)
 
-The shared features bind-mount host `~/.claude` (and friends) into the container. Writes fail if the container user's UID/GID differ from yours on the host:
+The shared features bind-mount host credential files into the container. Token refreshes can fail if the container user's UID/GID differ from yours on the host:
 
 - **Image/Dockerfile-based containers**: the devcontainer default `"updateRemoteUserUID": true` remaps the container user to your UID automatically — nothing to do.
 - **Docker-compose-based containers** (like `devcontainer.example.json`): UID remapping does *not* apply. Pass your UID/GID as build args in `docker-compose.yml` and create the user with them:
@@ -64,7 +69,13 @@ services:
         USER_GID: "${GID:-1000}"
 ```
 
-Also add an `initializeCommand` (see `devcontainer.example.json`) so `~/.claude` and `~/.claude.json` exist on the host before the container builds — otherwise Docker creates the missing bind sources as root-owned directories, which breaks Claude on the host.
+Authenticate each CLI on the host before creating the container. File bind
+mounts require the credential file to exist. See `devcontainer.example.json`
+for an `initializeCommand` that fails early when one is missing.
+
+The container can read the mounted tokens and refresh them on the host. Use
+auth-sharing features only with containers you trust. Use an isolated feature
+for third-party or customer-controlled images.
 
 ### Persisting /nix across rebuilds
 
@@ -101,8 +112,40 @@ For company-managed containers or customer environments, use the isolated featur
 Edit `home.nix` and run:
 
 ```bash
-home-manager switch
+hms
 ```
+
+`hms` reapplies the versions pinned in `flake.lock`.
+
+### Update Nix packages
+
+Run the repository updater directly, or use `hmu` after Home Manager has loaded
+the shell aliases:
+
+```bash
+./update.sh
+# or
+hmu
+```
+
+This updates the `nixpkgs` and Home Manager revisions in `flake.lock`, builds a
+new generation, and activates it. To refresh one input only, pass its name:
+
+```bash
+./update.sh nixpkgs
+```
+
+That is the Home Manager equivalent of refreshing package metadata and then
+upgrading installed packages. It does not update the Ubuntu or Debian base
+system in WSL or a container. Use `sudo apt update && sudo apt upgrade` for
+those packages.
+
+Old Home Manager generations provide rollback points. When disk space matters,
+remove unreachable Nix store paths separately with `nix store gc`.
+
+Bun currently has a 1.3.14 version floor because the unstable Nixpkgs revision
+still packages 1.3.13. The overlay automatically stops overriding Bun once
+Nixpkgs reaches that version or a newer one.
 
 ### Adjust host-specific settings
 
@@ -140,6 +183,7 @@ dotfiles/
 ├── home.nix                 # Nix/Home Manager config
 ├── hosts/default.nix        # Host-specific identity and machine paths
 ├── install.sh               # Installation script
+├── update.sh                # Refresh and activate pinned Nix packages
 ├── devcontainer.example.json
 ├── devcontainer-src/        # Feature templates + per-tool setup (edit these)
 │   └── generate.sh          # Regenerates every feature's install.sh

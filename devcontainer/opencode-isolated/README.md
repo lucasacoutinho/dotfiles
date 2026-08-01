@@ -9,7 +9,7 @@ Use this variant when the container must stay isolated from your host `~/.config
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/devcontainer-features/opencode-isolated:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/opencode-isolated:1": {}
   }
 }
 ```
@@ -24,4 +24,4 @@ Use this variant when the container must stay isolated from your host `~/.config
 
 - No host `~/.config/opencode/` or `~/.opencode/` bind mounts are configured
 - Authenticate inside the container if needed
-- If you want to reuse your host OpenCode session and global config instead, use the shared `opencode` feature
+- If you want to reuse only your host OpenCode login instead, use the shared `opencode` feature

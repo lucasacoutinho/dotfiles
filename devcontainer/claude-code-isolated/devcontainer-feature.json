@@ -1,6 +1,6 @@
 {
   "id": "claude-code-isolated",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "name": "Claude Code CLI (Isolated)",
   "description": "Installs Claude Code CLI without mounting host ~/.claude credentials or settings into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/claude-code-isolated",

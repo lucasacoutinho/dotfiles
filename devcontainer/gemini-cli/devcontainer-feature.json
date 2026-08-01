@@ -1,8 +1,8 @@
 {
   "id": "gemini-cli",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "name": "Google Gemini CLI",
-  "description": "Installs Google Gemini CLI and shares host ~/.gemini (auth, settings) with the devcontainer",
+  "description": "Installs Google Gemini CLI and mounts only host authentication into the devcontainer",
   "documentationURL": "https://github.com/lucasacoutinho/dotfiles/tree/main/devcontainer/gemini-cli",
   "keywords": [
     "gemini",
@@ -20,8 +20,13 @@
   },
   "mounts": [
     {
-      "source": "${localEnv:HOME}/.gemini",
-      "target": "/mnt/host-gemini",
+      "source": "${localEnv:HOME}/.gemini/oauth_creds.json",
+      "target": "/mnt/host-gemini-oauth-creds.json",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.gemini/google_accounts.json",
+      "target": "/mnt/host-gemini-google-accounts.json",
       "type": "bind"
     }
   ],

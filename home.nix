@@ -60,6 +60,7 @@ in
     # JS runtimes
     nodejs_24
     bun
+    herdr
   ];
 
   # Shell - Zsh
@@ -92,6 +93,7 @@ in
       ll = "eza -la --color=auto";
       lt = "eza --tree --color=auto";
       hms = hmSwitchCommand;
+      hmu = "${dotfilesDir}/update.sh";
     };
 
     initContent = ''
@@ -230,10 +232,12 @@ in
     settings = {
       gpg.format = "ssh";
       init.defaultBranch = "main";
-    } // lib.optionalAttrs (gitConfig ? name) {
-      user.name = gitConfig.name;
-    } // lib.optionalAttrs (gitConfig ? email) {
-      user.email = gitConfig.email;
+    } // lib.optionalAttrs (gitConfig ? name || gitConfig ? email) {
+      user = lib.optionalAttrs (gitConfig ? name) {
+        name = gitConfig.name;
+      } // lib.optionalAttrs (gitConfig ? email) {
+        email = gitConfig.email;
+      };
     };
     includes = [
       { path = "~/.gitconfig.local"; }
