@@ -1,0 +1,41 @@
+id = "lucas.recovery"
+name = "Agent recovery"
+version = "0.2.0"
+min_herdr_version = "0.7.5"
+description = "Audit and repair Codex and Claude sessions after a Herdr restart"
+platforms = ["linux"]
+
+[[startup]]
+command = ["bun", "src/main.ts", "startup"]
+
+[[actions]]
+id = "audit"
+title = "Audit restored agents"
+contexts = ["workspace"]
+command = ["bun", "src/main.ts", "audit"]
+
+[[actions]]
+id = "recover"
+title = "Recover missing agents"
+contexts = ["workspace"]
+command = ["bun", "src/main.ts", "recover"]
+
+[[actions]]
+id = "checkpoint"
+title = "Checkpoint live agents"
+contexts = ["workspace"]
+command = ["bun", "src/main.ts", "checkpoint"]
+
+[[actions]]
+id = "last-report"
+title = "Show the last recovery report"
+contexts = ["workspace"]
+command = ["bun", "src/main.ts", "last-report"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["bun", "src/main.ts", "checkpoint-event"]
+
+[[events]]
+on = "pane.closed"
+command = ["bun", "src/main.ts", "checkpoint-event"]

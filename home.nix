@@ -5,6 +5,7 @@ let
   gitConfig = local.git or { };
   kubeconfig = local.kubeconfig or null;
   dotfilesDir = local.dotfilesDir or "${local.homeDirectory}/personal/dotfiles";
+  herdrRecoveryPlugin = "${local.homeDirectory}/.local/share/herdr-plugins/recovery";
   isMinimal = (local.profile or "full") == "minimal";
   hmSwitchCommand = "home-manager switch --impure --flake path:${dotfilesDir}#default";
 in
@@ -264,6 +265,24 @@ in
   # Bash (minimal, for scripts/fallback)
   home.file.".bashrc".force = true;
   home.file.".profile".force = true;
+  home.file.".local/share/herdr-plugins/recovery" = lib.mkIf (!isMinimal) {
+    source = ./herdr-plugins/recovery;
+    recursive = true;
+  };
+
+  # Link the recovery plugin into a compatible live server when possible. An
+  # incompatible server must stay alive until its panes are safe to stop, so
+  # register through an unused socket and let the next server load the plugin.
+  home.activation.registerHerdrRecovery = lib.mkIf (!isMinimal) (lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    herdr_status="$(${pkgs.herdr}/bin/herdr status server 2>/dev/null || true)"
+    if printf '%s\n' "$herdr_status" | ${pkgs.gnugrep}/bin/grep -q '^compatible: yes$'; then
+      ${pkgs.herdr}/bin/herdr plugin link "${herdrRecoveryPlugin}" --enabled >/dev/null
+      ${pkgs.herdr}/bin/herdr plugin action invoke lucas.recovery.checkpoint >/dev/null || true
+    else
+      HERDR_SOCKET_PATH="${config.xdg.configHome}/herdr/plugin-registration.sock" \
+        ${pkgs.herdr}/bin/herdr plugin link "${herdrRecoveryPlugin}" --enabled >/dev/null
+    fi
+  '');
 
   programs.bash = {
     enable = true;

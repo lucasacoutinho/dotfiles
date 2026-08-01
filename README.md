@@ -44,6 +44,25 @@ Nix manages the user environment. Ubuntu or Debian packages still use
 available for rollback; run `nix store gc` separately when you want to remove
 unreachable store paths.
 
+## Herdr recovery
+
+The full Home Manager profile installs and enables the local `lucas.recovery`
+plugin. It keeps a private checkpoint of pane/session mappings, updates it as
+agents are detected, and uses live process arguments as well as official Codex
+and Claude session references. After a cold restart, it waits for Herdr's
+native restore to settle, starts agents that fell back to shells, and verifies
+their live arguments. Codex sessions resume with `--yolo`; conflicts and busy
+panes are reported but left alone. The minimal devcontainer profile skips it.
+
+Run a read-only check at any time:
+
+```bash
+herdr plugin action invoke lucas.recovery.audit
+```
+
+The plugin source, recovery actions, safety rules, and configuration options
+live in [`herdr-plugins/recovery`](./herdr-plugins/recovery).
+
 ## Agent features
 
 The shared devcontainer features reuse host authentication without importing

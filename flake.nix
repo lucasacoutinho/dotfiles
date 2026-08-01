@@ -55,5 +55,35 @@
         inherit pkgs;
         modules = [ ./home.nix ];
       };
+
+      checks.${system}.herdr-recovery = pkgs.runCommand "herdr-recovery-check" {
+        nativeBuildInputs = [ pkgs.bun pkgs.herdr pkgs.jq ];
+      } ''
+        export HOME="$TMPDIR/home"
+        export XDG_CONFIG_HOME="$TMPDIR/config"
+        export XDG_DATA_HOME="$TMPDIR/data"
+        export XDG_STATE_HOME="$TMPDIR/state"
+        export HERDR_CONFIG_PATH="$XDG_CONFIG_HOME/herdr/config.toml"
+        export HERDR_SOCKET_PATH="$XDG_CONFIG_HOME/herdr/offline.sock"
+
+        mkdir -p "$HOME"
+        cp -R ${./herdr-plugins/recovery} plugin
+        chmod -R u+w plugin
+        cd plugin
+
+        bun test
+        bun build src/main.ts --target=bun --outfile "$TMPDIR/herdr-recovery"
+        herdr plugin link "$PWD" --disabled >/dev/null
+        jq -e '
+          length == 1
+          and .[0].plugin_id == "lucas.recovery"
+          and .[0].min_herdr_version == "0.7.5"
+          and .[0].version == "0.2.0"
+          and .[0].enabled == false
+        ' "$XDG_CONFIG_HOME/herdr/plugins.json" >/dev/null
+
+        mkdir -p "$out"
+        touch "$out/passed"
+      '';
     };
 }
