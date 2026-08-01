@@ -1,157 +1,83 @@
-# Dotfiles
+<div align="center">
+  <h1>Dotfiles</h1>
+  <p>Nix-managed command-line tools and auth-isolated agent features for Linux, WSL, and devcontainers.</p>
 
-Unified development environment: Nix tooling + devcontainer features.
+  <a href="https://github.com/lucasacoutinho/dotfiles/actions/workflows/validate.yml"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/lucasacoutinho/dotfiles/validate.yml?branch=main&style=for-the-badge&labelColor=000000"></a>
+  <a href="https://github.com/lucasacoutinho/dotfiles/actions/workflows/release.yml"><img alt="Feature release" src="https://img.shields.io/github/actions/workflow/status/lucasacoutinho/dotfiles/release.yml?branch=main&style=for-the-badge&label=features&labelColor=000000"></a>
+  <img alt="Nix and Home Manager" src="https://img.shields.io/badge/Nix-Home%20Manager-5277C3?style=for-the-badge&logo=nixos&logoColor=white&labelColor=000000">
+</div>
 
-## Quick Install
+## Getting started
+
+Clone the repository and run the installer:
 
 ```bash
 git clone https://github.com/lucasacoutinho/dotfiles.git ~/personal/dotfiles
 ~/personal/dotfiles/install.sh
 ```
 
-## What's Included
+The installer bootstraps Nix when needed, enables flakes, and activates the
+Home Manager configuration pinned by `flake.lock`.
 
-### Nix/Home Manager (`home.nix`)
+## Nix environment
 
-- **Zsh** with autosuggestions and syntax highlighting
-- **Starship** prompt (minimal, fast)
-- **Modern CLI tools**: ripgrep, fd, bat, eza, fzf, zoxide, jq, htop, tree
-- **Data processing**: yq, qsv
-- **Code analysis**: tokei, tree-sitter, universal-ctags
-- **Development runtimes**: Node.js, Bun, Herdr
+The default profile installs Zsh, Starship, Git, Direnv, Node.js, Bun, Herdr,
+and a focused set of shell, data-processing, and code-analysis tools. The full
+package list lives in [`home.nix`](./home.nix).
 
-### Devcontainer Features (`devcontainer/`)
+Use the shell aliases after activation:
 
-AI CLI tools in two modes:
+| Command | Purpose |
+| --- | --- |
+| `hms` | Rebuild and activate the versions already pinned in `flake.lock` |
+| `hmu` | Update flake inputs, build a new generation, and activate it |
 
-- Auth-only sharing: `claude-code`, `codex`, `gemini-cli`, `opencode`
-- Isolated/no-host-secrets: `claude-code-isolated`, `codex-isolated`, `gemini-cli-isolated`, `opencode-isolated`
+You can also run the updater directly:
 
-The auth-only features bind only each CLI's credential file. They do not share
-host settings, skills, plugins, MCP configuration, project context, history,
-sessions, caches, or memories. Each container starts with its own agent setup.
+```bash
+./update.sh
+./update.sh nixpkgs # update one input only
+```
 
-### Claude Code
+Nix manages the user environment. Ubuntu or Debian packages still use
+`sudo apt update && sudo apt upgrade`. Old Home Manager generations remain
+available for rollback; run `nix store gc` separately when you want to remove
+unreachable store paths.
 
-- Project hooks in `.claude/settings.json` block direct host-side language/package-manager commands and push Claude toward `docker compose exec ...` when you are outside the devcontainer
+## Agent features
 
-## Usage in Devcontainers
+The shared devcontainer features reuse host authentication without importing
+personal agent state. Settings, skills, plugins, MCP configuration, project
+context, history, sessions, caches, and memories stay local to the container.
 
-See `devcontainer.example.json` or add to your `devcontainer.json`:
+| CLI | Auth-only feature | Isolated feature | Mounted host file |
+| --- | --- | --- | --- |
+| Claude Code | `claude-code:1` | `claude-code-isolated:1` | `~/.claude/.credentials.json` |
+| Codex | `codex:1` | `codex-isolated:1` | `~/.codex/auth.json` |
+| Gemini CLI | `gemini-cli:1` | `gemini-cli-isolated:1` | `~/.gemini/oauth_creds.json` and `google_accounts.json` |
+| OpenCode | `opencode:1` | `opencode-isolated:1` | `~/.local/share/opencode/auth.json` |
+
+Add a feature to `devcontainer.json` after authenticating that CLI on the host:
 
 ```json
 {
   "features": {
-    "ghcr.io/lucasacoutinho/dotfiles/claude-code:1": {}
-  },
-  "containerEnv": { "DOTFILES_PROFILE": "minimal" },
-  "postCreateCommand": "git clone https://github.com/lucasacoutinho/dotfiles.git ~/personal/dotfiles && ~/personal/dotfiles/install.sh"
-}
-```
-
-Pin features by major version (`:1`) rather than `:latest` so a new release can't break every project at once. `DOTFILES_PROFILE=minimal` skips the heavy infrastructure packages (k9s, talosctl, ansible, opam) inside project containers — see [Customizing](#customizing).
-
-Keep editor secrets out of tracked config. For example, set `intelephense.licenceKey` only in an untracked local file such as `.vscode/settings.json`.
-
-### UID/GID alignment (important for bind mounts)
-
-The shared features bind-mount host credential files into the container. Token refreshes can fail if the container user's UID/GID differ from yours on the host:
-
-- **Image/Dockerfile-based containers**: the devcontainer default `"updateRemoteUserUID": true` remaps the container user to your UID automatically — nothing to do.
-- **Docker-compose-based containers** (like `devcontainer.example.json`): UID remapping does *not* apply. Pass your UID/GID as build args in `docker-compose.yml` and create the user with them:
-
-```yaml
-services:
-  app:
-    build:
-      args:
-        USER_UID: "${UID:-1000}"
-        USER_GID: "${GID:-1000}"
-```
-
-Authenticate each CLI on the host before creating the container. File bind
-mounts require the credential file to exist. See `devcontainer.example.json`
-for an `initializeCommand` that fails early when one is missing.
-
-The container can read the mounted tokens and refresh them on the host. Use
-auth-sharing features only with containers you trust. Use an isolated feature
-for third-party or customer-controlled images.
-
-### Persisting /nix across rebuilds
-
-`install.sh` reinstalls the whole Nix closure on every container rebuild unless `/nix` is persisted. For compose-based projects, add a named volume in `docker-compose.yml`:
-
-```yaml
-services:
-  app:
-    volumes:
-      - nix-store:/nix
-volumes:
-  nix-store:
-```
-
-For image-based devcontainers, use `"mounts": ["source=nix-store,target=/nix,type=volume"]` in `devcontainer.json` instead.
-
-For company-managed containers or customer environments, use the isolated features instead of the shared host-auth variants:
-
-```json
-{
-  "features": {
-    "ghcr.io/lucasacoutinho/dotfiles/claude-code-isolated:1": {},
-    "ghcr.io/lucasacoutinho/dotfiles/codex-isolated:1": {},
-    "ghcr.io/lucasacoutinho/dotfiles/gemini-cli-isolated:1": {},
-    "ghcr.io/lucasacoutinho/dotfiles/opencode-isolated:1": {}
+    "ghcr.io/lucasacoutinho/dotfiles/codex:1": {}
   }
 }
 ```
 
-## Customizing
+Credential mounts are writable so token refreshes survive rebuilds. A trusted
+container can read those tokens. Use the isolated variants for third-party,
+untrusted, or customer-controlled images.
 
-### Add Nix packages
+Compose-based containers must create their remote user with the same UID and
+GID as the host user. Image-based devcontainers normally handle this through
+`"updateRemoteUserUID": true`.
 
-Edit `home.nix` and run:
+## Configuration
 
-```bash
-hms
-```
-
-`hms` reapplies the versions pinned in `flake.lock`.
-
-### Update Nix packages
-
-Run the repository updater directly, or use `hmu` after Home Manager has loaded
-the shell aliases:
-
-```bash
-./update.sh
-# or
-hmu
-```
-
-This updates the `nixpkgs` and Home Manager revisions in `flake.lock`, builds a
-new generation, and activates it. To refresh one input only, pass its name:
-
-```bash
-./update.sh nixpkgs
-```
-
-That is the Home Manager equivalent of refreshing package metadata and then
-upgrading installed packages. It does not update the Ubuntu or Debian base
-system in WSL or a container. Use `sudo apt update && sudo apt upgrade` for
-those packages.
-
-Old Home Manager generations provide rollback points. When disk space matters,
-remove unreachable Nix store paths separately with `nix store gc`.
-
-Bun currently has a 1.3.14 version floor because the unstable Nixpkgs revision
-still packages 1.3.13. The overlay automatically stops overriding Bun once
-Nixpkgs reaches that version or a newer one.
-
-### Adjust host-specific settings
-
-`hosts/default.nix` derives username, home directory, and paths from `$USER`/`$HOME`/`$DOTFILES_DIR`/`$KUBECONFIG` at switch time, so the same config works for any user. It also holds the default git identity.
-
-For values that differ per machine (work email, signing key, kubeconfig path), create a gitignored `hosts/local.nix` — any top-level value overrides the default, and `git` is merged key-by-key:
+Create the gitignored `hosts/local.nix` for machine-specific values:
 
 ```nix
 {
@@ -160,42 +86,23 @@ For values that differ per machine (work email, signing key, kubeconfig path), c
 }
 ```
 
-### Package profiles
+Set `DOTFILES_PROFILE=minimal` in project containers to skip infrastructure
+packages such as k9s, Talos, Ansible, and opam. Persist `/nix` with a named
+volume if you want Nix packages to survive container rebuilds.
 
-Set `DOTFILES_PROFILE=minimal` (e.g. via `containerEnv` in `devcontainer.json`) to skip the infrastructure/devops packages (k9s, talosctl, ansible, opam) — project containers usually only need the shell tools. The default profile is `full`.
+See [`devcontainer.example.json`](./devcontainer.example.json) for a complete
+compose-based setup and the individual feature directories under
+[`devcontainer/`](./devcontainer/) for tool-specific prerequisites.
 
-### Developing the devcontainer features
+## Development
 
-The per-feature `install.sh` files are generated. Edit the sources in `devcontainer-src/` (shared templates, Node bootstrap, per-tool setup scripts) and run:
+Feature installers are generated from `devcontainer-src/`. After changing a
+template or setup script, regenerate and validate the published files:
 
 ```bash
 ./devcontainer-src/generate.sh
+./devcontainer-src/validate-auth-boundary.sh
 ```
 
-The sources live outside `devcontainer/` because the publish action treats every subdirectory there as a feature.
-
-CI refuses to publish if generated files are stale. The `devcontainer-feature.json` manifests are hand-authored — mounts and lifecycle hooks genuinely differ per tool.
-
-## Structure
-
-```
-dotfiles/
-├── home.nix                 # Nix/Home Manager config
-├── hosts/default.nix        # Host-specific identity and machine paths
-├── install.sh               # Installation script
-├── update.sh                # Refresh and activate pinned Nix packages
-├── devcontainer.example.json
-├── devcontainer-src/        # Feature templates + per-tool setup (edit these)
-│   └── generate.sh          # Regenerates every feature's install.sh
-├── devcontainer/            # Published devcontainer features
-│   ├── claude-code/         # Generated install.sh + hand-authored manifest
-│   ├── claude-code-isolated/
-│   ├── codex/
-│   ├── codex-isolated/
-│   ├── gemini-cli/
-│   ├── gemini-cli-isolated/
-│   ├── opencode/
-│   └── opencode-isolated/
-├── .claude/settings.json    # Claude Code project hooks
-└── .github/workflows/       # Feature release automation
-```
+GitHub Actions rejects stale generated installers and any shared feature that
+mounts more than its credential allowlist.
