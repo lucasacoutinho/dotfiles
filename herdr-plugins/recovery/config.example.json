@@ -1,0 +1,21 @@
+{
+  "startupDelayMs": 20000,
+  "startupCaptureDelayMs": 2000,
+  "startupAttempts": 3,
+  "retryDelayMs": 3000,
+  "processExitTimeoutMs": 5000,
+  "startTimeoutMs": 45000,
+  "maxParallel": 3,
+  "agents": {
+    "codex": {
+      "enabled": true,
+      "resumeArgs": ["--yolo", "resume", "{session}"],
+      "replaceWrongArgs": true
+    },
+    "claude": {
+      "enabled": true,
+      "resumeArgs": ["--resume", "{session}"],
+      "replaceWrongArgs": false
+    }
+  }
+}

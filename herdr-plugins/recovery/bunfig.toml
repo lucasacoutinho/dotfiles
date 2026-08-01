@@ -1,0 +1,6 @@
+# Keep builds and tests independent from ambient developer configuration.
+env = false
+telemetry = false
+
+[test]
+root = "./test"

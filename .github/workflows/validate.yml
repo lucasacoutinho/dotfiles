@@ -48,3 +48,8 @@ jobs:
         run: |
           nix build --impure --dry-run \
             "path:$PWD#homeConfigurations.default.activationPackage"
+
+      - name: Test Herdr recovery plugin
+        run: |
+          nix build --impure \
+            "path:$PWD#checks.x86_64-linux.herdr-recovery"

@@ -1,0 +1,9 @@
+{
+  "name": "herdr-recovery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/main.ts --compile --minify --sourcemap=linked --bytecode --no-compile-autoload-dotenv --no-compile-autoload-bunfig --outfile dist/herdr-recovery",
+    "test": "bun test"
+  }
+}

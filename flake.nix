@@ -49,11 +49,37 @@
         inherit system;
         overlays = [ minimumBunOverlay ];
       };
+      herdrRecoveryPlugin = import ./nix/herdr-recovery.nix { inherit pkgs; };
     in
     {
       homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [ ./home.nix ];
       };
+
+      checks.${system}.herdr-recovery = pkgs.runCommand "herdr-recovery-check" {
+        nativeBuildInputs = [ pkgs.herdr pkgs.jq ];
+      } ''
+        export HOME="$TMPDIR/home"
+        export XDG_CONFIG_HOME="$TMPDIR/config"
+        export XDG_DATA_HOME="$TMPDIR/data"
+        export XDG_STATE_HOME="$TMPDIR/state"
+        export HERDR_CONFIG_PATH="$XDG_CONFIG_HOME/herdr/config.toml"
+        export HERDR_SOCKET_PATH="$XDG_CONFIG_HOME/herdr/offline.sock"
+
+        mkdir -p "$HOME"
+        test -x ${herdrRecoveryPlugin}/bin/herdr-recovery
+        herdr plugin link ${herdrRecoveryPlugin} --disabled >/dev/null
+        jq -e '
+          length == 1
+          and .[0].plugin_id == "lucas.recovery"
+          and .[0].min_herdr_version == "0.7.5"
+          and .[0].version == "0.2.0"
+          and .[0].enabled == false
+        ' "$XDG_CONFIG_HOME/herdr/plugins.json" >/dev/null
+
+        mkdir -p "$out"
+        touch "$out/passed"
+      '';
     };
 }
